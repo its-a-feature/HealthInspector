@@ -660,4 +660,3 @@ function Global_Preferences({help=false} = {}){
 	output += Bluetooth_Connections();
 	return output;
 }
-All_Checks();
