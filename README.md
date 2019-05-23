@@ -4,6 +4,11 @@ JXA situational awareness helper by simply reading specific files on a filesyste
 ## Purpose
 Health Inspector is designed to help provide some additional situation awareness for operations on macOS by doing a lot of discovery by simply reading PLIST files or other files on disk that any user can read. I wanted to find another way to do discovery in JXA and macOS in general without having to spawn a bunch of bash commands.
 
+## Execution
+To run the functions within HealthInspector with Apfell, use the `jsimport` and `jsimport_call` functions within the `apfell-jxa` payload. When you run `jsimport_call` be sure to specify the function you want to execute afterwards, such as: `jsimport_call All_Checks()`. 
+
+## Current Functions
+
 The current list of functions and associated files is below:
 
 
@@ -37,6 +42,9 @@ The current list of functions and associated files is below:
 | Network_Interfaces | List of basic network interfaces, active, type, and user information | /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist| 
 | Bluetooth_Connections | List of bluetooth connections, when they last connected, and what class of item/name |/Library/Preferences/com.apple.Bluetooth.plist | 
 | OS_Version | Software build version, name, and normal version | /System/Library/CoreServices/SystemVersion.plist|
+| All_Checks | Do all of the above checks | |
+| User_Preferences | Do all checks related to the user specifically | |
+| Global_Preferences | Do all checks related to global preferences that don't fall in ~/ | |
 
 ## Contributing
 Please open pull requests for new files you find to parse that provide useful information. If possible, please also include the file (or example of the file) if it's not a default Apple plist
