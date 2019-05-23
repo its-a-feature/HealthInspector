@@ -36,4 +36,7 @@ The current list of functions and associated files is below:
 | WiFi_Messages | List of WiFi association SSIDs | /Library/Preferences/SystemConfiguration/com.apple.wifi.message-tracer.plist| 
 | Network_Interfaces | List of basic network interfaces, active, type, and user information | /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist| 
 | Bluetooth_Connections | List of bluetooth connections, when they last connected, and what class of item/name |/Library/Preferences/com.apple.Bluetooth.plist | 
-| OS_Version | Software build version, name, and normal version | /System/Library/CoreServices/SystemVersion.plist| 
+| OS_Version | Software build version, name, and normal version | /System/Library/CoreServices/SystemVersion.plist|
+
+## Contributing
+Please open pull requests for new files you find to parse that provide useful information. If possible, please also include the file (or example of the file) if it's not a default Apple plist
