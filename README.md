@@ -7,6 +7,9 @@ Health Inspector is designed to help provide some additional situation awareness
 ## Execution
 To run the functions within HealthInspector with Apfell, use the `jsimport` and `jsimport_call` functions within the `apfell-jxa` payload. When you run `jsimport_call` be sure to specify the function you want to execute afterwards, such as: `jsimport_call All_Checks()`. 
 
+If you want to execute this outside of an Apfell apfell-jxa payload, you can execute it with osascript:
+`osascript HealthInspector.js`. You will need to append to the bottom of the script the function you want to call though. The script itself is just a list of functions.
+
 ## Current Functions
 
 The current list of functions and associated files is below:
