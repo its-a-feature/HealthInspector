@@ -1,5 +1,5 @@
 //Author Cody Thomas, @its_a_feature_
-//All of these functions use Objective C API calls to read PLIST files or normal from an unauthenticated context
+//All of these functions use Objective C API calls to read PLIST files from an unauthenticated context
 //Helper Functions -----------------------------------
 function hex2a(hexx) {
     var hex = hexx.toString();//force conversion
@@ -7,6 +7,23 @@ function hex2a(hexx) {
     for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     return str;
+}
+function get_permissions(path){
+	var fileManager = $.NSFileManager.defaultManager;
+	attributes = ObjC.deepUnwrap(fileManager.attributesOfItemAtPathError($(path), $()));
+    var trimmed_attributes = {};
+    trimmed_attributes['NSFileOwnerAccountID'] = attributes['NSFileOwnerAccountID'];
+    trimmed_attributes['NSFileExtensionHidden'] = attributes['NSFileExtensionHidden'];
+    trimmed_attributes['NSFileGroupOwnerAccountID'] = attributes['NSFileGroupOwnerAccountID'];
+    trimmed_attributes['NSFileOwnerAccountName'] = attributes['NSFileOwnerAccountName'];
+    trimmed_attributes['NSFileCreationDate'] = attributes['NSFileCreationDate'];
+    var nsposix = attributes['NSFilePosixPermissions'];
+    // we need to fix this mess to actually be real permission bits that make sense
+    var posix = ((nsposix >> 6) & 0x7).toString() + ((nsposix >> 3) & 0x7).toString() + (nsposix & 0x7).toString();
+    trimmed_attributes['NSFilePosixPermissions'] = posix;
+    trimmed_attributes['NSFileGroupOwnerAccountName'] = attributes['NSFileGroupOwnerAccountName'];
+    trimmed_attributes['NSFileModificationDate'] = attributes['NSFileModificationDate'];
+    return trimmed_attributes;
 }
 //-------------------------------------------------
 function Persistent_Dock_Apps({help=false} = {}){
@@ -237,6 +254,9 @@ function User_Launchagents({help=false} = {}){
 	for(i in files){
 		var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchAgents/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
+		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
+            dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
+		}
 		output[files[i]] = dict;
 		
 	}
@@ -254,8 +274,11 @@ function User_Launchdaemons({help=false} = {}){
 	for(i in files){
 		var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LauncDaemons/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
+		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
+            dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
+		}
 		output[files[i]] = dict;
-		
+		 
 	}
 	output = "**************************************\n" + "***** User's Launch Daemons *****\n" + "**************************************\n" + JSON.stringify(output, null , 2);
 	return output;}
