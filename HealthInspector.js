@@ -256,6 +256,10 @@ function User_Launchagents({help=false} = {}){
 		dict = ObjC.deepUnwrap(dict);
 		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
+            program_dir = dict['ProgramArguments'][0].split("/");
+            program_dir.pop();
+            program_dir = "/" + program_dir.join("/");
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
 		}
 		output[files[i]] = dict;
 		
@@ -276,6 +280,10 @@ function User_Launchdaemons({help=false} = {}){
 		dict = ObjC.deepUnwrap(dict);
 		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
+            program_dir = dict['ProgramArguments'][0].split("/");
+            program_dir.pop();
+            program_dir = "/" + program_dir.join("/");
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
 		}
 		output[files[i]] = dict;
 		 
