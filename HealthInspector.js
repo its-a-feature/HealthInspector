@@ -26,7 +26,7 @@ function get_permissions(path){
     return trimmed_attributes;
 }
 //-------------------------------------------------
-function Persistent_Dock_Apps({help=false} = {}){
+function Persistent_Dock_Apps({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -45,9 +45,15 @@ function Persistent_Dock_Apps({help=false} = {}){
 		output['persistent-dock-apps'].push({"label": contents['persistent-others'][i]['tile-data']['file-label'],
 											 "bundle": contents['persistent-others'][i]['tile-data']['bundle-identifier']});
 	}
-	output = "**************************************\n" + "**** Persistent Dock Applications ****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "**** Persistent Dock Applications ****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	} 
+	else{
+		output['HealthInspectorCommand'] = "Persistent_Dock_Apps";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Spaces_Check({help=false} = {}){
+function Spaces_Check({help=false, json=false} = {}){
 	if(help){
 		var output = "";
 		return output;
@@ -73,9 +79,20 @@ function Spaces_Check({help=false} = {}){
 			output['Main Desktop']['Total Spaces'] = totalSpaces;
 		}
 	}
-	output = "**************************************\n" + "******** Desktops Information ********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "******** Desktops Information ********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}
+	else{
+		output['HealthInspectorCommand'] = "Spaces_Check";
+		output = JSON.stringify(output, null, 1);
+	}
+	
 	return output;}
-function Get_Office_Email({help=false} = {}){
+function Get_Office_Email({help=false, json=false} = {}){
+	if(help){
+		var output = "";
+		return output;
+	}
 	var fileManager = $.NSFileManager.defaultManager;
 	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
 	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.microsoft.office.plist");
@@ -83,10 +100,15 @@ function Get_Office_Email({help=false} = {}){
 	var output = {};
 	if(contents != {} && contents != undefined){
 		output['email'] = contents['OfficeActivationEmailAddress'];
-		output = "**************************************\n" + "****** Registered Office Email ******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		if(json==false){
+			output = "**************************************\n" + "****** Registered Office Email ******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		}else{
+			output['HealthInspectorCommand'] = "Get_Office_Email";
+			output = JSON.stringify(output, null, 1);
+		}
 	}
 	return output;}
-function Saved_Printers({help=false} = {}){
+function Saved_Printers({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -102,10 +124,15 @@ function Saved_Printers({help=false} = {}){
 			output['LastUsedPrinters'].push({"Network": contents['LastUsedPrinters'][i]['Network'],
 											 "PrinterID": contents['LastUsedPrinters'][i]['PrinterID']});
 		}
-		output = "**************************************\n" + "********* Last Used Printers *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		if(json==false){
+			output = "**************************************\n" + "********* Last Used Printers *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		}else{
+			output['HealthInspectorCommand'] = "Saved_Printers";
+			output = JSON.stringify(output, null, 1);
+		}
 	}	
 	return output;}
-function Finder_Preferences({help=false} = {}){
+function Finder_Preferences({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -125,10 +152,15 @@ function Finder_Preferences({help=false} = {}){
 		output['Recent Folders'].push(contents['FXRecentFolders'][i]['name']);
 	}
 	output['Prior Mounted Volumes'] = Object.keys(contents['FXDesktopVolumePositions']);
+	if(json==false){
+		output = "**************************************\n" + "** Recent Folders and Finder Prefs **\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Finder_Preferences";
+		output = JSON.stringify(output, null, 1);
+	}
 	
-	output = "**************************************\n" + "** Recent Folders and Finder Prefs **\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	return output;}
-function Launch_Services({help=false} = {}){
+function Launch_Services({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -158,9 +190,14 @@ function Launch_Services({help=false} = {}){
 			}
 		}
 	}
-	output = "**************************************\n" + "*** Custom LaunchServices Handlers ***\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "*** Custom LaunchServices Handlers ***\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Launch_Services";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Universal_Access_Auth_Warning({help=false} = {}){
+function Universal_Access_Auth_Warning({help=false, json=false} = {}){
 	// information on all apps that macOS has ever thrown the ‘some.app would like permission to control your computer
 	if(help){
 	    var output = "";
@@ -174,9 +211,14 @@ function Universal_Access_Auth_Warning({help=false} = {}){
 	if(contents != {}){
 		output['Universal Access Auth Warning Applications'] = contents;
 	}
-	output = "**************************************\n" + "**** UniversalAccess Auth Warning ****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "**** UniversalAccess Auth Warning ****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Universal_Access_Auth_Warning";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Relaunch_At_Login({help=false} = {}){
+function Relaunch_At_Login({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -193,9 +235,14 @@ function Relaunch_At_Login({help=false} = {}){
 			break;
 		}
 	}
-	output = "**************************************\n" + "* Applications to Relaunch at Login *\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "* Applications to Relaunch at Login *\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Relaunch_At_Login";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function LoginItems({help=false} = {}){
+function Login_Items({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -206,11 +253,16 @@ function LoginItems({help=false} = {}){
 	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.loginitems.plist");
 	var contents = ObjC.deepUnwrap(dict);
 	if(contents != {}){
-		output['LoginItems'] = contents;
+		output['Login_Items'] = contents;
 	}
-	output = "**************************************\n" + "************ Login Items ************\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "************ Login Items ************\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Login_Items";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function User_Dir_Hidden_Files_Folders({help=false} = {}){
+function User_Dir_Hidden_Files_Folders({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -224,9 +276,14 @@ function User_Dir_Hidden_Files_Folders({help=false} = {}){
 			output.push(files[i]);
 		}
 	}
-	output = "**************************************\n" + "***** Hidden Files/Folders in ~ *****\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "***** Hidden Files/Folders in ~ *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "User_Dir_Hidden_Files_Folders";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function User_Global_Preferences({help=false} = {}){
+function User_Global_Preferences({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -240,9 +297,14 @@ function User_Global_Preferences({help=false} = {}){
 	output['Recent Places'] = contents['NSNavRecentPlaces'];
 	output['Finder Sync Extensions'] = Object.keys(contents['com.apple.finder.SyncExtensions']['dirMap']);
 	output['Show All Extensions'] = contents['AppleShowAllExtensions'];
-	output = "**************************************\n" + "***** User's Global Preferences *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "***** User's Global Preferences *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "User_Global_Preferences";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function User_Launchagents({help=false} = {}){
+function User_Launchagents({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -264,9 +326,14 @@ function User_Launchagents({help=false} = {}){
 		output[files[i]] = dict;
 		
 	}
-	output = "**************************************\n" + "***** User's Launch Agents *****\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "***** User's Launch Agents *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "User_Launchagents";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function User_Launchdaemons({help=false} = {}){
+function User_Launchdaemons({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -288,9 +355,14 @@ function User_Launchdaemons({help=false} = {}){
 		output[files[i]] = dict;
 		 
 	}
-	output = "**************************************\n" + "***** User's Launch Daemons *****\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "***** User's Launch Daemons *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "User_Launchdaemons";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Installed_Software_Versions({help=false} = {}){
+function Installed_Software_Versions({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -311,9 +383,14 @@ function Installed_Software_Versions({help=false} = {}){
 		}
 		
 	}
-	output = "**************************************\n" + "********** Software Verions  *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "********** Software Verions  *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Installed_Software_Versions";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Local_Account_File({help=false} = {}){
+function Local_Account_File({help=false, json=false} = {}){
 	//Note: this file will probably only exist for mobile accounts tied to AD
 	if(help){
 	    var output = "";
@@ -324,10 +401,15 @@ function Local_Account_File({help=false} = {}){
 	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
 	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/.account");
 	var contents = ObjC.deepUnwrap(dict);
-	output = "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + JSON.stringify(contents, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + JSON.stringify(contents, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Local_Account_File";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
 // ----------- user data mining functions -------------
-function Unique_Bash_History_Sessions({help=false} = {}){
+function Unique_Bash_History_Sessions({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -351,9 +433,14 @@ function Unique_Bash_History_Sessions({help=false} = {}){
 		}
 	}
 	output['commands'] = Array.from(final_commands);
-	output = "**************************************\n" + "******* Unique Bash History *******\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "******* Unique Bash History *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Unique_Bash_History_Sessions";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function SSH_Keys({help=false} = {}){
+function SSH_Keys({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -368,9 +455,14 @@ function SSH_Keys({help=false} = {}){
 		output[files[i]] = dict;
 		
 	}
-	output = "**************************************\n" + "********* SSH Key Files *********\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "********* SSH Key Files *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "SSH_Keys";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Read_Local_Group_Lists({help=false} = {}){
+function Read_Local_Group_Lists({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -385,9 +477,15 @@ function Read_Local_Group_Lists({help=false} = {}){
 		}
 	}
 	output["Groups"] = lines;
-	output = "**************************************\n" + "********* Local Groups *********\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "********* Local Groups *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Read_Local_Group_Lists";
+		output = JSON.stringify(output, null, 1);
+	}
+	
 	return output;}
-function Slack_Download_Cache_History({help=false} = {}){
+function Slack_Download_Cache_History({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -407,9 +505,14 @@ function Slack_Download_Cache_History({help=false} = {}){
 			}
 		}
 	}
-	output = "**************************************\n" + "********* Slack Downloads *********\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "********* Slack Downloads *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Slack_Download_Cache_History";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Slack_Team_Information({help=false} = {}){
+function Slack_Team_Information({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -427,9 +530,14 @@ function Slack_Team_Information({help=false} = {}){
 		}
 		output['slack team information'] = dict;
 	}
-	output = "**************************************\n" + "********* Slack Team Info *********\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "********* Slack Team Info *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Slack_Team_Information";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Recent_Files({help=false} = {}){
+function Recent_Files({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -445,10 +553,15 @@ function Recent_Files({help=false} = {}){
 			output['Recent Applications'].push(contents['$objects'][i]);
 		}
 	}
-	output = "**************************************\n" + "***** User's recent applications *****\n" + "**************************************\n" + JSON.stringify(output, null , 2);
+	if(json==false){
+		output = "**************************************\n" + "***** User's recent applications *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Recent_Files";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
 //------------ globally readable plists with interesting info ------------------
-function Firewall({help=false} = {}){
+function Firewall({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -488,9 +601,14 @@ function Firewall({help=false} = {}){
 	}
 	output['Stealth Enabled'] = contents['stealthenabled'];
 	output['Logging'] = contents['loggingenabled'];
-	output = "**************************************\n" + "******* Firewall Preferences *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "******* Firewall Preferences *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Firewall";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Airport_Preferences({help=false} = {}){
+function Airport_Preferences({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -519,9 +637,14 @@ function Airport_Preferences({help=false} = {}){
 									   "Was Captive": wasCaptive, "Captive Bypass": captiveBypass,
 									   "Nearby Networks": collocatedGroup})
 	}
-	output = "**************************************\n" + "******** Airport Preferences ********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "******** Airport Preferences ********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Airport_Preferences";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function SMB_Server({help=false} = {}){
+function SMB_Server({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -533,9 +656,14 @@ function SMB_Server({help=false} = {}){
 	output['Local Kerberos Realm'] = contents['LocalKerberosRealm'];
 	output['NETBIOS Name'] = contents['NetBIOSName'];
 	output['Server Description'] = contents['ServerDescription'];
-	output = "**************************************\n" + "******* SMB Server Preferences *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "******* SMB Server Preferences *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "SMB_Server";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function WiFi_Messages({help=false} = {}){
+function WiFi_Messages({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -559,10 +687,16 @@ function WiFi_Messages({help=false} = {}){
 			condensed = condensed.substring(1, condensed.length-1)
 			output['InternalAssociation SSIDs'].push(hex2a(condensed));
 		}
-		output = "**************************************\n" + "********* WiFi Associations *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		if(json==false){
+			output = "**************************************\n" + "********* WiFi Associations *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+		}else{
+			output['HealthInspectorCommand'] = "WiFi_Messages";
+			output = JSON.stringify(output, null, 1);
+		}
+		
 	}
 	return output;}
-function Network_Interfaces({help=false} = {}){
+function Network_Interfaces({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -579,10 +713,14 @@ function Network_Interfaces({help=false} = {}){
 		output['Network Interfaces'][contents['Interfaces'][i]['BSD Name']]['Network Type'] = contents['Interfaces'][i]['SCNetworkInterfaceType'];
 		output['Network Interfaces'][contents['Interfaces'][i]['BSD Name']]['Info'] = contents['Interfaces'][i]['SCNetworkInterfaceInfo'];
 	}
-
-	output = "**************************************\n" + "********* Network Interfaces *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	if(json==false){
+		output = "**************************************\n" + "********* Network Interfaces *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Network_Interfaces";
+		output = JSON.stringify(output, null, 1);
+	}
 	return output;}
-function Bluetooth_Connections({help=false} = {}){
+function Bluetooth_Connections({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -615,10 +753,15 @@ function Bluetooth_Connections({help=false} = {}){
 		for(var i = 0; i < contents['PairedDevices'].length; i++){
 			output['Currently Paired Devices'].push(string_to_name[contents['PairedDevices'][i]]);
 		}
-		output = "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Convert Class of Device with: http://domoticx.com/bluetooth-class-of-device-list-cod/\n" + JSON.stringify(output, null , 1);
+		if(json==false){
+			output = "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Convert Class of Device with: http://domoticx.com/bluetooth-class-of-device-list-cod/\n" + JSON.stringify(output, null , 1);
+		}else{
+			output['HealthInspectorCommand'] = "Bluetooth_Connections";
+			output = JSON.stringify(output, null, 1);
+		}
 	}	
 	return output;}
-function OS_Version({help=false} = {}){
+function OS_Version({help=false, json=false} = {}){
 	if(help){
 	    var output = "";
 		return output;
@@ -626,68 +769,74 @@ function OS_Version({help=false} = {}){
 	var output = {};
 	var fileManager = $.NSFileManager.defaultManager;
 	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/System/Library/CoreServices/SystemVersion.plist");
-	var contents = ObjC.deepUnwrap(dict);
-	output = "**************************************\n" + "********** OS Version Info  **********\n" + "**************************************\n" + JSON.stringify(contents, null , 1);
+	var output = ObjC.deepUnwrap(dict);
+	if(json==false){
+		output = "**************************************\n" + "********** OS Version Info  **********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "OS_Version";
+		output = JSON.stringify(output, null, 1);
+	}
+	
 	return output;}
 //---------------------------------------------------------
-function All_Checks({help=false} = {}){
+function All_Checks({help=false, json=false} = {}){
 	output = "";
-	output += "\n" + Persistent_Dock_Apps();
-	output += "\n" + Spaces_Check();
-	output += "\n" + Get_Office_Email();
-	output += "\n" + Saved_Printers();
-	output += "\n" + Finder_Preferences();
-	output += "\n" + Launch_Services();
-	output += "\n" + Universal_Access_Auth_Warning();
-	output += "\n" + Relaunch_At_Login();
-	output += "\n" + LoginItems();
-	output += "\n" + User_Dir_Hidden_Files_Folders();
-	output += "\n" + User_Global_Preferences();
-	output += "\n" + User_Launchagents();
-	output += "\n" + User_Launchdaemons();
-	output += "\n" + Installed_Software_Versions();
-	output += "\n" + Local_Account_File();
-	output += "\n" + Unique_Bash_History_Sessions();
-	output += "\n" + SSH_Keys();
-	output += "\n" + Read_Local_Group_Lists();
-	output += "\n" + Slack_Download_Cache_History();
-	output += "\n" + Slack_Team_Information();
-	output += "\n" + Recent_Files();
-	output += "\n" + Firewall();
-	output += "\n" + Airport_Preferences();
-	output += "\n" + SMB_Server();
-	output += "\n" + WiFi_Messages();
-	output += "\n" + Network_Interfaces();
-	output += "\n" + Bluetooth_Connections();
-	output += "\n" + OS_Version();
+	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
+	output += "\n" + Spaces_Check({"help":help, "json":json});
+	output += "\n" + Get_Office_Email({"help":help, "json":json});
+	output += "\n" + Saved_Printers({"help":help, "json":json});
+	output += "\n" + Finder_Preferences({"help":help, "json":json});
+	output += "\n" + Launch_Services({"help":help, "json":json});
+	output += "\n" + Universal_Access_Auth_Warning({"help":help, "json":json});
+	output += "\n" + Relaunch_At_Login({"help":help, "json":json});
+	output += "\n" + Login_Items({"help":help, "json":json});
+	output += "\n" + User_Dir_Hidden_Files_Folders({"help":help, "json":json});
+	output += "\n" + User_Global_Preferences({"help":help, "json":json});
+	output += "\n" + User_Launchagents({"help":help, "json":json});
+	output += "\n" + User_Launchdaemons({"help":help, "json":json});
+	output += "\n" + Installed_Software_Versions({"help":help, "json":json});
+	output += "\n" + Local_Account_File({"help":help, "json":json});
+	output += "\n" + Unique_Bash_History_Sessions({"help":help, "json":json});
+	output += "\n" + SSH_Keys({"help":help, "json":json});
+	output += "\n" + Read_Local_Group_Lists({"help":help, "json":json});
+	output += "\n" + Slack_Download_Cache_History({"help":help, "json":json});
+	output += "\n" + Slack_Team_Information({"help":help, "json":json});
+	output += "\n" + Recent_Files({"help":help, "json":json});
+	output += "\n" + Firewall({"help":help, "json":json});
+	output += "\n" + Airport_Preferences({"help":help, "json":json});
+	output += "\n" + SMB_Server({"help":help, "json":json});
+	output += "\n" + WiFi_Messages({"help":help, "json":json});
+	output += "\n" + Network_Interfaces({"help":help, "json":json});
+	output += "\n" + Bluetooth_Connections({"help":help, "json":json});
+	output += "\n" + OS_Version({"help":help, "json":json});
 	return output;
 }
-function User_Preferences(){
+function User_Preferences({help=false, json=false} = {}){
 	output = "";
-	output += "\n" + Persistent_Dock_Apps();
-	output += "\n" + Spaces_Check();
-	output += "\n" + Get_Office_Email();
-	output += "\n" + Saved_Printers();
-	output += "\n" + Finder_Preferences();
-	output += "\n" + Launch_Services();
-	output += "\n" + Universal_Access_Auth_Warning();
-	output += "\n" + Relaunch_At_Login();
-	output += "\n" + Global_Preferences();
-	output += "\n" + OS_Version();
-	output += "\n" + Installed_Software_Versions();
-	output += "\n" + User_Launchagents();
-	output += "\n" + User_Launchdaemons();
-	output += "\n" + Slack_Download_Cache_History();
-	output += "\n" + Slack_Team_Information();
+	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
+	output += "\n" + Spaces_Check({"help":help, "json":json});
+	output += "\n" + Get_Office_Email({"help":help, "json":json});
+	output += "\n" + Saved_Printers({"help":help, "json":json});
+	output += "\n" + Finder_Preferences({"help":help, "json":json});
+	output += "\n" + Launch_Services({"help":help, "json":json});
+	output += "\n" + Universal_Access_Auth_Warning({"help":help, "json":json});
+	output += "\n" + Relaunch_At_Login({"help":help, "json":json});
+	output += "\n" + Global_Preferences({"help":help, "json":json});
+	output += "\n" + OS_Version({"help":help, "json":json});
+	output += "\n" + Installed_Software_Versions({"help":help, "json":json});
+	output += "\n" + User_Launchagents({"help":help, "json":json});
+	output += "\n" + User_Launchdaemons({"help":help, "json":json});
+	output += "\n" + Slack_Download_Cache_History({"help":help, "json":json});
+	output += "\n" + Slack_Team_Information({"help":help, "json":json});
 	return output;
 }
-function Global_Preferences({help=false} = {}){
+function Global_Preferences({help=false, json=false} = {}){
 	output = "";
-	output += Firewall();
-	output += Airport_Preferences();
-	output += SMB_Server();
-	output += WiFi_Messages();
-	output += Network_Interfaces();
-	output += Bluetooth_Connections();
+	output += Firewall({"help":help, "json":json});
+	output += Airport_Preferences({"help":help, "json":json});
+	output += SMB_Server({"help":help, "json":json});
+	output += WiFi_Messages({"help":help, "json":json});
+	output += Network_Interfaces({"help":help, "json":json});
+	output += Bluetooth_Connections({"help":help, "json":json});
 	return output;
 }
