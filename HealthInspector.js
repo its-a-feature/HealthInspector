@@ -2,46 +2,58 @@
 //All of these functions use Objective C API calls to read PLIST files from an unauthenticated context
 //Helper Functions -----------------------------------
 function hex2a(hexx) {
-    var hex = hexx.toString();//force conversion
-    var str = '';
-    for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
+    let hex = hexx.toString();//force conversion
+    let str = '';
+    for (let i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     return str;
 }
 function get_permissions(path){
-	var fileManager = $.NSFileManager.defaultManager;
+	let fileManager = $.NSFileManager.defaultManager;
 	attributes = ObjC.deepUnwrap(fileManager.attributesOfItemAtPathError($(path), $()));
-    var trimmed_attributes = {};
+    let trimmed_attributes = {};
     trimmed_attributes['NSFileOwnerAccountID'] = attributes['NSFileOwnerAccountID'];
     trimmed_attributes['NSFileExtensionHidden'] = attributes['NSFileExtensionHidden'];
     trimmed_attributes['NSFileGroupOwnerAccountID'] = attributes['NSFileGroupOwnerAccountID'];
     trimmed_attributes['NSFileOwnerAccountName'] = attributes['NSFileOwnerAccountName'];
     trimmed_attributes['NSFileCreationDate'] = attributes['NSFileCreationDate'];
-    var nsposix = attributes['NSFilePosixPermissions'];
+    let nsposix = attributes['NSFilePosixPermissions'];
     // we need to fix this mess to actually be real permission bits that make sense
-    var posix = ((nsposix >> 6) & 0x7).toString() + ((nsposix >> 3) & 0x7).toString() + (nsposix & 0x7).toString();
+    let posix = ((nsposix >> 6) & 0x7).toString() + ((nsposix >> 3) & 0x7).toString() + (nsposix & 0x7).toString();
     trimmed_attributes['NSFilePosixPermissions'] = posix;
     trimmed_attributes['NSFileGroupOwnerAccountName'] = attributes['NSFileGroupOwnerAccountName'];
     trimmed_attributes['NSFileModificationDate'] = attributes['NSFileModificationDate'];
     return trimmed_attributes;
 }
+function file_exists(path){
+	let fileManager = $.NSFileManager.defaultManager;
+	return fileManager.fileExistsAtPath($(path));
+}
 //-------------------------------------------------
 function Persistent_Dock_Apps({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.dock.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.dock.plist")){
+		if(json==false){
+			return "**************************************\n" + "**** Persistent Dock Applications ****\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Persistent_Dock_Apps"});
+		}
+	}
+
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.dock.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['persistent-dock-apps'] = [];
-	for(var i = 0; i < contents['persistent-apps'].length; i++){
+	for(let i = 0; i < contents['persistent-apps'].length; i++){
 		output['persistent-dock-apps'].push({"label": contents['persistent-apps'][i]['tile-data']['file-label'],
 											 "bundle": contents['persistent-apps'][i]['tile-data']['bundle-identifier']});
 	}
-	for(var i = 0; i < contents['persistent-others'].length; i++){
+	for(let i = 0; i < contents['persistent-others'].length; i++){
 		output['persistent-dock-apps'].push({"label": contents['persistent-others'][i]['tile-data']['file-label'],
 											 "bundle": contents['persistent-others'][i]['tile-data']['bundle-identifier']});
 	}
@@ -55,21 +67,29 @@ function Persistent_Dock_Apps({help=false, json=false} = {}){
 	return output;}
 function Spaces_Check({help=false, json=false} = {}){
 	if(help){
-		var output = "";
+		let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.spaces.plist");
-	var contents = ObjC.deepUnwrap(dict);
-	var monitors = contents['SpacesDisplayConfiguration']['Management Data']['Monitors'];
-	for(var i = 0; i < monitors.length; i++){
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.spaces.plist")){
+		if(json==false){
+			return "**************************************\n" + "******** Desktops Information ********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Spaces_Check"});
+		}
+	}
+	
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.spaces.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	let monitors = contents['SpacesDisplayConfiguration']['Management Data']['Monitors'];
+	for(let i = 0; i < monitors.length; i++){
 		if(monitors[i]['Display Identifier'] == "Main"){
-			var currentSpaceID = monitors[i]['Current Space']['ManagedSpaceID'];
-			var currentSpacePlace = 0;
-			var totalSpaces = monitors[i]['Spaces'].length;
-			for(var j = 0; j < monitors[i]['Spaces'].length; j++){
+			let currentSpaceID = monitors[i]['Current Space']['ManagedSpaceID'];
+			let currentSpacePlace = 0;
+			let totalSpaces = monitors[i]['Spaces'].length;
+			for(let j = 0; j < monitors[i]['Spaces'].length; j++){
 				if(currentSpaceID == monitors[i]['Spaces'][j]['ManagedSpaceID']){
 					currentSpacePlace = j + 1;
 				}
@@ -90,14 +110,21 @@ function Spaces_Check({help=false, json=false} = {}){
 	return output;}
 function Get_Office_Email({help=false, json=false} = {}){
 	if(help){
-		var output = "";
+		let output = "";
 		return output;
 	}
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.microsoft.office.plist");
-	var contents = ObjC.deepUnwrap(dict);
-	var output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.microsoft.office.plist")){
+		if(json==false){
+			return "**************************************\n" + "****** Registered Office Email ******\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Get_Office_Email"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.microsoft.office.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	let output = {};
 	if(contents != {} && contents != undefined){
 		output['email'] = contents['OfficeActivationEmailAddress'];
 		if(json==false){
@@ -110,17 +137,24 @@ function Get_Office_Email({help=false, json=false} = {}){
 	return output;}
 function Saved_Printers({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/org.cups.PrintingPrefs.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/org.cups.PrintingPrefs.plist")){
+		if(json==false){
+			return "**************************************\n" + "********* Last Used Printers *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Saved_Printers"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/org.cups.PrintingPrefs.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['LastUsedPrinters'] = [];
 	if(contents != undefined){
-		for(var i = 0; i < contents['LastUsedPrinters'].length; i++){
+		for(let i = 0; i < contents['LastUsedPrinters'].length; i++){
 			output['LastUsedPrinters'].push({"Network": contents['LastUsedPrinters'][i]['Network'],
 											 "PrinterID": contents['LastUsedPrinters'][i]['PrinterID']});
 		}
@@ -134,21 +168,28 @@ function Saved_Printers({help=false, json=false} = {}){
 	return output;}
 function Finder_Preferences({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.finder.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.finder.plist")){
+		if(json==false){
+			return "**************************************\n" + "** Recent Folders and Finder Prefs **\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Finder_Preferences"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.finder.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Recent Move and Copy Destinations'] = contents['RecentMoveAndCopyDestinations'];
 	output['Finder GoTo Folder Recents'] = contents['GoToFieldHistory'];
 	output['Show All Files in Finder'] = contents['AppleShowAllFiles'];
 	output['Show Removable Media on Desktop'] = contents['ShowRemovableMediaOnDesktop'];
 	output['Tag Names'] = contents['FavoriteTagNames'];
 	output['Recent Folders'] = [];
-	for(var i = 0; i < contents['FXRecentFolders'].length; i++){
+	for(let i = 0; i < contents['FXRecentFolders'].length; i++){
 		output['Recent Folders'].push(contents['FXRecentFolders'][i]['name']);
 	}
 	output['Prior Mounted Volumes'] = Object.keys(contents['FXDesktopVolumePositions']);
@@ -162,18 +203,25 @@ function Finder_Preferences({help=false, json=false} = {}){
 	return output;}
 function Launch_Services({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist")){
+		if(json==false){
+			return "**************************************\n" + "*** Custom LaunchServices Handlers ***\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Launch_Services"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['LSHandlers_FileExtensions'] = [];
 	output['LSHandlers_URLSchemes'] = [];
 	if(contents != undefined){
-		for(var i = 0; i < contents['LSHandlers'].length; i++){
+		for(let i = 0; i < contents['LSHandlers'].length; i++){
 			if(contents['LSHandlers'][i].hasOwnProperty('LSHandlerContentTag')){
 				output['LSHandlers_FileExtensions'].push({"file_extension": contents['LSHandlers'][i]['LSHandlerContentTag'],
 														  "handler": contents['LSHandlers'][i]['LSHandlerRoleAll']});
@@ -200,14 +248,21 @@ function Launch_Services({help=false, json=false} = {}){
 function Universal_Access_Auth_Warning({help=false, json=false} = {}){
 	// information on all apps that macOS has ever thrown the ‘some.app would like permission to control your computer
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.universalaccessAuthWarning.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.universalaccessAuthWarning.plist")){
+		if(json==false){
+			return "**************************************\n" + "**** UniversalAccess Auth Warning ****\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Universal_Access_Auth_Warning"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.universalaccessAuthWarning.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	if(contents != {}){
 		output['Universal Access Auth Warning Applications'] = contents;
 	}
@@ -220,17 +275,17 @@ function Universal_Access_Auth_Warning({help=false, json=false} = {}){
 	return output;}
 function Relaunch_At_Login({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/Preferences/ByHost", Ref()));
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/Preferences/ByHost", Ref()));
 	output['Relaunch Apps'] = [];
 	for(i in files){
 		if(files[i].includes("com.apple.loginwindow") && files[i].endsWith(".plist")){
-			var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/ByHost/" + files[i]);
+			let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/ByHost/" + files[i]);
 			output['Relaunch Apps'] = ObjC.deepUnwrap(dict)['TALAppsToRelaunchAtLogin'];
 			break;
 		}
@@ -244,14 +299,21 @@ function Relaunch_At_Login({help=false, json=false} = {}){
 	return output;}
 function Login_Items({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.loginitems.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.loginitems.plist")){
+		if(json==false){
+			return "**************************************\n" + "************ Login Items ************\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Login_Items"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/com.apple.loginitems.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	if(contents != {}){
 		output['Login_Items'] = contents;
 	}
@@ -264,13 +326,13 @@ function Login_Items({help=false, json=false} = {}){
 	return output;}
 function User_Dir_Hidden_Files_Folders({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = [];
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath, Ref()));
+	let output = [];
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath, Ref()));
 	for(i in files){
 		if(files[i][0] == "."){
 			output.push(files[i]);
@@ -285,14 +347,21 @@ function User_Dir_Hidden_Files_Folders({help=false, json=false} = {}){
 	return output;}
 function User_Global_Preferences({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/.GlobalPreferences.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Preferences/.GlobalPreferences.plist")){
+		if(json==false){
+			return "**************************************\n" + "***** User's Global Preferences *****\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "User_Global_Preferences"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/.GlobalPreferences.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Default Web Service'] = contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSDefaultDisplayName'] + " - " + contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSProviderIdentifier']
 	output['Recent Places'] = contents['NSNavRecentPlaces'];
 	output['Finder Sync Extensions'] = Object.keys(contents['com.apple.finder.SyncExtensions']['dirMap']);
@@ -306,15 +375,15 @@ function User_Global_Preferences({help=false, json=false} = {}){
 	return output;}
 function User_Launchagents({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchAgents/", Ref()));
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchAgents/", Ref()));
 	for(i in files){
-		var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchAgents/" + files[i]);
+		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchAgents/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
 		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
@@ -335,15 +404,15 @@ function User_Launchagents({help=false, json=false} = {}){
 	return output;}
 function User_Launchdaemons({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchDaemons/", Ref()));
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchDaemons/", Ref()));
 	for(i in files){
-		var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LauncDaemons/" + files[i]);
+		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LauncDaemons/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
 		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
@@ -364,13 +433,20 @@ function User_Launchdaemons({help=false, json=false} = {}){
 	return output;}
 function Installed_Software_Versions({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var dict = $.NSArray.alloc.initWithContentsOfFile("/Library/Receipts/InstallHistory.plist");
-	var contents = ObjC.deepUnwrap(dict);
-	for(var i in contents){
+	let output = {};
+	if(!file_exists("/Library/Receipts/InstallHistory.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** Software Verions  *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Installed_Software_Versions"});
+		}
+	}
+	let dict = $.NSArray.alloc.initWithContentsOfFile("/Library/Receipts/InstallHistory.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	for(let i in contents){
 		if(!output.hasOwnProperty(contents[i]['displayName'])){
 			output[contents[i]['displayName']] = {};
 		}
@@ -393,14 +469,21 @@ function Installed_Software_Versions({help=false, json=false} = {}){
 function Local_Account_File({help=false, json=false} = {}){
 	//Note: this file will probably only exist for mobile accounts tied to AD
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/.account");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/.account")){
+		if(json==false){
+			return "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Local_Account_File"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/.account");
+	let contents = ObjC.deepUnwrap(dict);
 	if(json==false){
 		output = "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + JSON.stringify(contents, null , 1);
 	}else{
@@ -411,24 +494,24 @@ function Local_Account_File({help=false, json=false} = {}){
 // ----------- user data mining functions -------------
 function Unique_Bash_History_Sessions({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.bash_sessions/", Ref()));
-	var final_commands = new Set();
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.bash_sessions/", Ref()));
+	let final_commands = new Set();
 	for(i in files){
-		var list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.bash_sessions/" + files[i], $.NSUTF8StringEncoding, $()).js.split("\n");
-		for(var j in list){
+		let list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.bash_sessions/" + files[i], $.NSUTF8StringEncoding, $()).js.split("\n");
+		for(let j in list){
 			final_commands.add(list[j]);
 		}
 	}
-	var list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.bash_history", $.NSUTF8StringEncoding, $()).js;
+	let list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.bash_history", $.NSUTF8StringEncoding, $()).js;
 	if(list != undefined){
 		list = list.split("\n");
-		for(var j in list){
+		for(let j in list){
 			final_commands.add(list[j]);
 		}
 	}
@@ -442,15 +525,15 @@ function Unique_Bash_History_Sessions({help=false, json=false} = {}){
 	return output;}
 function SSH_Keys({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.ssh", Ref()));
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.ssh", Ref()));
 	for(i in files){
-		var dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.ssh/" + files[i], $.NSUTF8StringEncoding, $());
+		let dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.ssh/" + files[i], $.NSUTF8StringEncoding, $());
 		dict = ObjC.deepUnwrap(dict);
 		output[files[i]] = dict;
 		
@@ -464,14 +547,21 @@ function SSH_Keys({help=false, json=false} = {}){
 	return output;}
 function Read_Local_Group_Lists({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSString.alloc.initWithContentsOfFileEncodingError("/private/etc/group", $.NSUTF8StringEncoding, $()).js.split("\n");
-	var lines = [];
-	for(var i in dict){
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/private/etc/group")){
+		if(json==false){
+			return "**************************************\n" + "********* Local Groups *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Read_Local_Group_Lists"});
+		}
+	}
+	let dict = $.NSString.alloc.initWithContentsOfFileEncodingError("/private/etc/group", $.NSUTF8StringEncoding, $()).js.split("\n");
+	let lines = [];
+	for(let i in dict){
 		if(!dict[i].includes("#")){
 			lines.push(dict[i]);
 		}
@@ -487,20 +577,27 @@ function Read_Local_Group_Lists({help=false, json=false} = {}){
 	return output;}
 function Slack_Download_Cache_History({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/Library/Application Support/Slack/storage/slack-downloads", $.NSUTF8StringEncoding, $()).js;
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Application Support/Slack/storage/slack-downloads")){
+		if(json==false){
+			return "**************************************\n" + "********* Slack Downloads *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Slack_Download_Cache_History"});
+		}
+	}
+	let dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/Library/Application Support/Slack/storage/slack-downloads", $.NSUTF8StringEncoding, $()).js;
 	if(dict != "" && dict != undefined){
 		dict = JSON.parse(dict);
 		team_keys = Object.keys(dict);
 		output['slack download cache history'] = [];
-		for(var team_key in team_keys){
-			var file_keys = Object.keys(dict[team_keys[team_key]]);
-			for(var file_key in file_keys){
+		for(let team_key in team_keys){
+			let file_keys = Object.keys(dict[team_keys[team_key]]);
+			for(let file_key in file_keys){
 				output['slack download cache history'].push({"url":dict[team_keys[team_key]][file_keys[file_key]]['url'], "download path": dict[team_keys[team_key]][file_keys[file_key]]['downloadPath']});
 			}
 		}
@@ -514,17 +611,24 @@ function Slack_Download_Cache_History({help=false, json=false} = {}){
 	return output;}
 function Slack_Team_Information({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
-	var dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/Library/Application Support/Slack/storage/slack-teams", $.NSUTF8StringEncoding, $()).js;
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	if(!file_exists(currentUserPath + "/Library/Application Support/Slack/storage/slack-teams")){
+		if(json==false){
+			return "**************************************\n" + "********* Slack Team Info *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Slack_Team_Information"});
+		}
+	}
+	let dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/Library/Application Support/Slack/storage/slack-teams", $.NSUTF8StringEncoding, $()).js;
 	if(dict != "" && dict != undefined){
 		dict = JSON.parse(dict);
 		keys = Object.keys(dict);
-		for(var key in keys){
+		for(let key in keys){
 			delete dict[keys[key]]['theme'];
 			delete dict[keys[key]]['icons'];
 		}
@@ -539,16 +643,23 @@ function Slack_Team_Information({help=false, json=false} = {}){
 	return output;}
 function Recent_Files({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
 	output['Recent Applications'] = [];
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2");
-	var contents = ObjC.deepUnwrap(dict);
-	for(var i = 0; i < contents['$objects'].length; i++){
+	if(!file_exists(currentUserPath + "/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2")){
+		if(json==false){
+			return "**************************************\n" + "***** User's recent applications *****\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Recent_Files"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2");
+	let contents = ObjC.deepUnwrap(dict);
+	for(let i = 0; i < contents['$objects'].length; i++){
 		if(typeof contents['$objects'][i] == "string" && contents['$objects'][i].includes(".app")){
 			output['Recent Applications'].push(contents['$objects'][i]);
 		}
@@ -563,17 +674,24 @@ function Recent_Files({help=false, json=false} = {}){
 //------------ globally readable plists with interesting info ------------------
 function Firewall({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.alf.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/com.apple.alf.plist")){
+		if(json==false){
+			return "**************************************\n" + "******* Firewall Preferences *******\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Firewall"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.alf.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Exceptions'] = [];
-	for(var i = 0; i < contents['exceptions'].length; i++){
+	for(let i = 0; i < contents['exceptions'].length; i++){
 		if(contents['exceptions'][i].hasOwnProperty('bundleid')){
-			var item = {};
+			let item = {};
 			item['path'] = contents['exceptions'][i]['path'];
 			item['bundleID'] = contents['exceptions'][i]['bundleid'];
 			output['Exceptions'].push(item);
@@ -583,13 +701,13 @@ function Firewall({help=false, json=false} = {}){
 		}
 	}
 	output['Explicit Auths'] = [];
-	for(var i = 0; i < contents['explicitauths'].length; i++){
+	for(let i = 0; i < contents['explicitauths'].length; i++){
 		output['Explicit Auths'].push(contents['explicitauths'][i]['id']);
 	}
 	output['Global State'] = contents['globalstate'];
 	firewall_keys = Object.keys(contents['firewall']);
 	for(i in firewall_keys){
-		var status = contents['firewall'][firewall_keys[i]]['state'];
+		let status = contents['firewall'][firewall_keys[i]]['state'];
 		output[firewall_keys[i]] = {};
 		if(status == 0){
 			output[firewall_keys[i]]['status'] = "Disabled";
@@ -610,27 +728,34 @@ function Firewall({help=false, json=false} = {}){
 	return output;}
 function Airport_Preferences({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist")){
+		if(json==false){
+			return "**************************************\n" + "******** Airport Preferences ********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Airport_Preferences"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Known Networks'] = [];
-	var wifi_keys = Object.keys(contents['KnownNetworks']);
-	var hex_to_ssid = {};
-	for(var i in wifi_keys){
+	let wifi_keys = Object.keys(contents['KnownNetworks']);
+	let hex_to_ssid = {};
+	for(let i in wifi_keys){
 		hex_to_ssid[wifi_keys[i]] = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
 	}
-	for(var i in wifi_keys){
-		var SSID = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
-		var SecurityType = contents['KnownNetworks'][wifi_keys[i]]['SecurityType'];
-		var lastConnected = contents['KnownNetworks'][wifi_keys[i]]['LastConnected'];
-		var wasCaptive = contents['KnownNetworks'][wifi_keys[i]]['NetworkWasCaptive'];
-		var captiveBypass = contents['KnownNetworks'][wifi_keys[i]]['CaptiveBypass'];
-		var collocatedGroup = [];
-		for(var j = 0; j < contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'].length; j++){
+	for(let i in wifi_keys){
+		let SSID = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
+		let SecurityType = contents['KnownNetworks'][wifi_keys[i]]['SecurityType'];
+		let lastConnected = contents['KnownNetworks'][wifi_keys[i]]['LastConnected'];
+		let wasCaptive = contents['KnownNetworks'][wifi_keys[i]]['NetworkWasCaptive'];
+		let captiveBypass = contents['KnownNetworks'][wifi_keys[i]]['CaptiveBypass'];
+		let collocatedGroup = [];
+		for(let j = 0; j < contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'].length; j++){
 			collocatedGroup.push(hex_to_ssid[contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'][j]]);
 		}
 		output['Known Networks'].push({"SSID": SSID, "Security": SecurityType, "Last Connection": lastConnected,
@@ -646,13 +771,20 @@ function Airport_Preferences({help=false, json=false} = {}){
 	return output;}
 function SMB_Server({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist")){
+		if(json==false){
+			return "**************************************\n" + "******* SMB Server Preferences *******\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "SMB_Server"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.smb.server.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Local Kerberos Realm'] = contents['LocalKerberosRealm'];
 	output['NETBIOS Name'] = contents['NetBIOSName'];
 	output['Server Description'] = contents['ServerDescription'];
@@ -665,25 +797,32 @@ function SMB_Server({help=false, json=false} = {}){
 	return output;}
 function WiFi_Messages({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.wifi.message-tracer.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/SystemConfiguration/com.apple.wifi.message-tracer.plist")){
+		if(json==false){
+			return "**************************************\n" + "********* WiFi Associations *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "WiFi_Messages"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.wifi.message-tracer.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	if(contents != undefined){
-		var associationKeys = Object.keys(contents['AssociationSSIDMap']);
+		let associationKeys = Object.keys(contents['AssociationSSIDMap']);
 		output['Association SSIDs'] = [];
-		for(var i in associationKeys){
-			var condensed = associationKeys[i].replace(/ /g, '');
+		for(let i in associationKeys){
+			let condensed = associationKeys[i].replace(/ /g, '');
 			condensed = condensed.substring(1, condensed.length-1)
 			output['Association SSIDs'].push(hex2a(condensed));
 		}
-		var associationKeys = Object.keys(contents['InternalAssociationSSIDMap']);
+		associationKeys = Object.keys(contents['InternalAssociationSSIDMap']);
 		output['InternalAssociation SSIDs'] = [];
-		for(var i in associationKeys){
-			var condensed = associationKeys[i].replace(/ /g, '');
+		for(let i in associationKeys){
+			let condensed = associationKeys[i].replace(/ /g, '');
 			condensed = condensed.substring(1, condensed.length-1)
 			output['InternalAssociation SSIDs'].push(hex2a(condensed));
 		}
@@ -698,15 +837,22 @@ function WiFi_Messages({help=false, json=false} = {}){
 	return output;}
 function Network_Interfaces({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist")){
+		if(json==false){
+			return "**************************************\n" + "********* Network Interfaces *********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Network_Interfaces"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	output['Network Interfaces'] = {};
-	for(var i = 0; i < contents['Interfaces'].length; i++){
+	for(let i = 0; i < contents['Interfaces'].length; i++){
 		output['Network Interfaces'][contents['Interfaces'][i]['BSD Name']] = {};
 		output['Network Interfaces'][contents['Interfaces'][i]['BSD Name']]['Active'] = contents['Interfaces'][i]['Active'];
 		output['Network Interfaces'][contents['Interfaces'][i]['BSD Name']]['Built In'] = contents['Interfaces'][i]['IOBuiltin'];
@@ -722,35 +868,40 @@ function Network_Interfaces({help=false, json=false} = {}){
 	return output;}
 function Bluetooth_Connections({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.Bluetooth.plist");
-	var contents = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/com.apple.Bluetooth.plist")){
+		if(json==false){
+			return "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Bluetooth_Connections"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.Bluetooth.plist");
+	let contents = ObjC.deepUnwrap(dict);
 	if(contents != undefined && contents.hasOwnProperty('DeviceCache')){
-		var Bluetooth_Keys = Object.keys(contents['DeviceCache']);
-		var string_to_name = {};
-		for(var i in Bluetooth_Keys){
+		let Bluetooth_Keys = Object.keys(contents['DeviceCache']);
+		let string_to_name = {};
+		for(let i in Bluetooth_Keys){
 			string_to_name[Bluetooth_Keys[i]] = contents['DeviceCache'][Bluetooth_Keys[i]]['Name'];
 		}
 		output['Device Cache'] = [];
-		for(var i in Bluetooth_Keys){
+		for(let i in Bluetooth_Keys){
+			let  ClassOfDevice = undefined;
 			if(contents['DeviceCache'][Bluetooth_Keys[i]].hasOwnProperty('ClassOfDevice')){
-				var ClassOfDevice = contents['DeviceCache'][Bluetooth_Keys[i]]['ClassOfDevice'].toString(16);
+				ClassOfDevice = contents['DeviceCache'][Bluetooth_Keys[i]]['ClassOfDevice'].toString(16);
 			}
-			else{
-				var ClassOfDevice = undefined;
-			}
-			var displayName = contents['DeviceCache'][Bluetooth_Keys[i]]['displayName'];
-			var name = contents['DeviceCache'][Bluetooth_Keys[i]]['Name'];
-			var lastConnected = contents['DeviceCache'][Bluetooth_Keys[i]]['LastInquiryUpdate'];
-			var lastNameUpdate = contents['DeviceCache'][Bluetooth_Keys[i]]['LastNameUpdate'];
+			let displayName = contents['DeviceCache'][Bluetooth_Keys[i]]['displayName'];
+			let name = contents['DeviceCache'][Bluetooth_Keys[i]]['Name'];
+			let lastConnected = contents['DeviceCache'][Bluetooth_Keys[i]]['LastInquiryUpdate'];
+			let lastNameUpdate = contents['DeviceCache'][Bluetooth_Keys[i]]['LastNameUpdate'];
 			output['Device Cache'].push({"Name": name, "Class of Device": ClassOfDevice, "Last Connected": lastConnected, "Last Updated": lastNameUpdate, "Display Name": displayName})
 		}
 		output['Currently Paired Devices'] = [];
-		for(var i = 0; i < contents['PairedDevices'].length; i++){
+		for(let i = 0; i < contents['PairedDevices'].length; i++){
 			output['Currently Paired Devices'].push(string_to_name[contents['PairedDevices'][i]]);
 		}
 		if(json==false){
@@ -763,17 +914,72 @@ function Bluetooth_Connections({help=false, json=false} = {}){
 	return output;}
 function OS_Version({help=false, json=false} = {}){
 	if(help){
-	    var output = "";
+	    let output = "";
 		return output;
 	}
-	var output = {};
-	var fileManager = $.NSFileManager.defaultManager;
-	var dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/System/Library/CoreServices/SystemVersion.plist");
-	var output = ObjC.deepUnwrap(dict);
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/System/Library/CoreServices/SystemVersion.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** OS Version Info  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "OS_Version"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/System/Library/CoreServices/SystemVersion.plist");
+	output = ObjC.deepUnwrap(dict);
 	if(json==false){
 		output = "**************************************\n" + "********** OS Version Info  **********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	}else{
 		output['HealthInspectorCommand'] = "OS_Version";
+		output = JSON.stringify(output, null, 1);
+	}
+	
+	return output;}
+function Krb5_AD_Config({help=false, json=false}){
+	if(help){
+	    let output = "";
+		return output;
+	}
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/etc/krb5.conf")){
+		if(json==false){
+			return "**************************************\n" + "********** AD Config  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Krb5_AD_Config"});
+		}
+	}
+	let dict = $.NSString.alloc.initWithContentsOfFileEncodingError("/etc/krb5.conf", $.NSUTF8StringEncoding, $());
+	output = {"config": dict};
+	if(json==false){
+		output = "**************************************\n" + "********** AD Config  **********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Krb5_AD_Config";
+		output = JSON.stringify(output, null, 1);
+	}
+	
+	return output;}
+function Krb5_AD_Logging({help=false, json=false} = {}){
+	if(help){
+	    let output = "";
+		return output;
+	}
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/com.apple.Kerberos.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** Krb5 Logging  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Krb5_AD_Logging"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.Kerberos.plist");
+	output = ObjC.deepUnwrap(dict);
+	if(json==false){
+		output = "**************************************\n" + "********** Krb5 Logging  **********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Krb5_AD_Logging";
 		output = JSON.stringify(output, null, 1);
 	}
 	
@@ -809,6 +1015,8 @@ function All_Checks({help=false, json=false} = {}){
 	output += "\n" + Network_Interfaces({"help":help, "json":json});
 	output += "\n" + Bluetooth_Connections({"help":help, "json":json});
 	output += "\n" + OS_Version({"help":help, "json":json});
+	output += "\n" + Krb5_AD_Config({"help": help, "json":json});
+	output += "\n" + Krb5_AD_Logging({"help": help, "json":json});
 	return output;
 }
 function User_Preferences({help=false, json=false} = {}){
@@ -838,5 +1046,7 @@ function Global_Preferences({help=false, json=false} = {}){
 	output += WiFi_Messages({"help":help, "json":json});
 	output += Network_Interfaces({"help":help, "json":json});
 	output += Bluetooth_Connections({"help":help, "json":json});
+	output += Krb5_AD_Config({"help": help, "json":json});
+	output += Krb5_AD_Logging({"help": help, "json":json});
 	return output;
 }
