@@ -984,6 +984,70 @@ function Krb5_AD_Logging({help=false, json=false} = {}){
 	}
 	
 	return output;}
+
+function PaloaltoGlobalProtect({help=false, json=false} = {}){
+	if(help){
+		let output = "";
+		return output;
+    }
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/com.paloaltonetworks.GlobalProtect.settings.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** PaloaltoGlobalProtect portal  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "PaloaltoGlobalProtect"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.paloaltonetworks.GlobalProtect.settings.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	output['Global Protect Portal'] = contents['Palo Alto Networks']['GlobalProtect']['PanSetup']['Portal'];
+	output['Prelogon'] = contents['Palo Alto Networks']['GlobalProtect']['PanSetup']['Prelogon'];
+	if(json==false){
+		output = "****************************************************\n" + "***** Paloalto Networks Global Protect Portal *****\n" + "****************************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Check_PaloaltoGlobalProtect";
+		output = JSON.stringify(output, null, 1);
+	}
+
+	return output;}
+
+function Forcepoint_DLP_Information({help=false, json=false} = {}){
+	if(help){
+		let output = "";
+		return output;
+	}
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Application Support/Websense Endpoint/DLP/DLPClient.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** Forcepoint DLP Information  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Forcepoint_DLP_Information"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Application Support/Websense Endpoint/DLP/DLPClient.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	output['Connection domain name'] = contents['Connection domain name'];
+	output['Connection status'] = contents['Connection status'];
+	output['Connection user name'] = contents['Connection user name'];
+	output['Discovery status'] = contents['Discovery status'];
+	output['Endpoint profile name'] = contents['Endpoint profile name'];
+	output['Endpoint silent mode'] = contents['Endpoint silent mode'];
+	output['Endpoint status'] = contents['Endpoint status'];
+	output['Fingerprint version'] = contents['Fingerprint version'];
+	output['Policy version'] = contents['Policy version'];
+	output['Profile version'] = contents['Profile version'];
+	output['Remote bypass'] = contents['Remote bypass'];
+	if(json==false){
+		output = "********************************\n" + "***** Forcepoint DLP Info *****\n" + "********************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Forcepoint_DLP_Information";
+		output = JSON.stringify(output, null, 1);
+	}
+
+	return output;}
+
 //---------------------------------------------------------
 function All_Checks({help=false, json=false} = {}){
 	output = "";
@@ -1017,6 +1081,8 @@ function All_Checks({help=false, json=false} = {}){
 	output += "\n" + OS_Version({"help":help, "json":json});
 	output += "\n" + Krb5_AD_Config({"help": help, "json":json});
 	output += "\n" + Krb5_AD_Logging({"help": help, "json":json});
+	output += "\n" + PaloaltoGlobalProtect({"help": help, "json":json});
+	output += "\n" + Forcepoint_DLP_Information({"help": help, "json":json});
 	return output;
 }
 function User_Preferences({help=false, json=false} = {}){
@@ -1048,5 +1114,7 @@ function Global_Preferences({help=false, json=false} = {}){
 	output += Bluetooth_Connections({"help":help, "json":json});
 	output += Krb5_AD_Config({"help": help, "json":json});
 	output += Krb5_AD_Logging({"help": help, "json":json});
+	output += PaloaltoGlobalProtect({"help": help, "json":json});
+	output += Forcepoint_DLP_Information({"help": help, "json":json});
 	return output;
 }
