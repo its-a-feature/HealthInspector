@@ -1050,7 +1050,7 @@ function Forcepoint_DLP_Information({help=false, json=false} = {}){
 
 //---------------------------------------------------------
 function All_Checks({help=false, json=false} = {}){
-	output = "";
+	let output = "";
 	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
 	output += "\n" + Spaces_Check({"help":help, "json":json});
 	output += "\n" + Get_Office_Email({"help":help, "json":json});
@@ -1086,7 +1086,7 @@ function All_Checks({help=false, json=false} = {}){
 	return output;
 }
 function User_Preferences({help=false, json=false} = {}){
-	output = "";
+	let output = "";
 	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
 	output += "\n" + Spaces_Check({"help":help, "json":json});
 	output += "\n" + Get_Office_Email({"help":help, "json":json});
@@ -1105,7 +1105,7 @@ function User_Preferences({help=false, json=false} = {}){
 	return output;
 }
 function Global_Preferences({help=false, json=false} = {}){
-	output = "";
+	let output = "";
 	output += Firewall({"help":help, "json":json});
 	output += Airport_Preferences({"help":help, "json":json});
 	output += SMB_Server({"help":help, "json":json});
