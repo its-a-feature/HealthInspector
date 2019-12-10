@@ -366,9 +366,13 @@ function User_Global_Preferences({help=false, json=false} = {}){
 	}
 	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Preferences/.GlobalPreferences.plist");
 	let contents = ObjC.deepUnwrap(dict);
-	output['Default Web Service'] = contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSDefaultDisplayName'] + " - " + contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSProviderIdentifier']
+	if(contents['NSPreferredWebServices'] !== undefined){
+		output['Default Web Service'] = contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSDefaultDisplayName'] + " - " + contents['NSPreferredWebServices']['NSWebServicesProviderWebSearch']['NSProviderIdentifier']	
+	}
 	output['Recent Places'] = contents['NSNavRecentPlaces'];
-	output['Finder Sync Extensions'] = Object.keys(contents['com.apple.finder.SyncExtensions']['dirMap']);
+	if(contents['com.apple.finder.SyncExtensions'] !== undefined){	
+		output['Finder Sync Extensions'] = Object.keys(contents['com.apple.finder.SyncExtensions']['dirMap']);
+	}
 	output['Show All Extensions'] = contents['AppleShowAllExtensions'];
 	if(json==false){
 		output = "**************************************\n" + "***** User's Global Preferences *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
