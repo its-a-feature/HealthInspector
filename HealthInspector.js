@@ -11,7 +11,11 @@ function hex2a(hexx) {
 function get_permissions(path){
 	let fileManager = $.NSFileManager.defaultManager;
 	attributes = ObjC.deepUnwrap(fileManager.attributesOfItemAtPathError($(path), $()));
+	//return attributes;
     let trimmed_attributes = {};
+    if(attributes === undefined){
+    	return ["Failed to get permissions"];
+    }
     trimmed_attributes['NSFileOwnerAccountID'] = attributes['NSFileOwnerAccountID'];
     trimmed_attributes['NSFileExtensionHidden'] = attributes['NSFileExtensionHidden'];
     trimmed_attributes['NSFileGroupOwnerAccountID'] = attributes['NSFileGroupOwnerAccountID'];
@@ -385,9 +389,16 @@ function User_Launchagents({help=false, json=false} = {}){
 	for(i in files){
 		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchAgents/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
-		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
+		if(dict !== undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
             program_dir = dict['ProgramArguments'][0].split("/");
+            program_dir.pop();
+            program_dir = "/" + program_dir.join("/");
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
+		}
+		else if(dict !== undefined && dict.hasOwnProperty('Program')){
+			dict['Program Attributes'] = get_permissions(dict['Program']);
+            program_dir = dict['Program'].split("/");
             program_dir.pop();
             program_dir = "/" + program_dir.join("/");
             dict['Program Directory Attributes'] = get_permissions(program_dir);
@@ -417,6 +428,13 @@ function User_Launchdaemons({help=false, json=false} = {}){
 		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
             program_dir = dict['ProgramArguments'][0].split("/");
+            program_dir.pop();
+            program_dir = "/" + program_dir.join("/");
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
+		}
+		else if(dict !== undefined && dict.hasOwnProperty('Program')){
+			dict['Program Attributes'] = get_permissions(dict['Program']);
+            program_dir = dict['Program'].split("/");
             program_dir.pop();
             program_dir = "/" + program_dir.join("/");
             dict['Program Directory Attributes'] = get_permissions(program_dir);
@@ -659,6 +677,13 @@ function Recent_Files({help=false, json=false} = {}){
 	}
 	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2");
 	let contents = ObjC.deepUnwrap(dict);
+	if(contents === undefined){
+		if(json==false){
+			return "**************************************\n" + "***** User's recent applications *****\n" + "**************************************\n" + "Blocked by TCC";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Recent_Files"});
+		}
+	}
 	for(let i = 0; i < contents['$objects'].length; i++){
 		if(typeof contents['$objects'][i] == "string" && contents['$objects'][i].includes(".app")){
 			output['Recent Applications'].push(contents['$objects'][i]);
@@ -1106,15 +1131,15 @@ function User_Preferences({help=false, json=false} = {}){
 }
 function Global_Preferences({help=false, json=false} = {}){
 	let output = "";
-	output += Firewall({"help":help, "json":json});
-	output += Airport_Preferences({"help":help, "json":json});
-	output += SMB_Server({"help":help, "json":json});
-	output += WiFi_Messages({"help":help, "json":json});
-	output += Network_Interfaces({"help":help, "json":json});
-	output += Bluetooth_Connections({"help":help, "json":json});
-	output += Krb5_AD_Config({"help": help, "json":json});
-	output += Krb5_AD_Logging({"help": help, "json":json});
-	output += PaloaltoGlobalProtect({"help": help, "json":json});
-	output += Forcepoint_DLP_Information({"help": help, "json":json});
+	output += "\n" + Firewall({"help":help, "json":json});
+	output += "\n" + Airport_Preferences({"help":help, "json":json});
+	output += "\n" + SMB_Server({"help":help, "json":json});
+	output += "\n" + WiFi_Messages({"help":help, "json":json});
+	output += "\n" + Network_Interfaces({"help":help, "json":json});
+	output += "\n" + Bluetooth_Connections({"help":help, "json":json});
+	output += "\n" + Krb5_AD_Config({"help": help, "json":json});
+	output += "\n" + Krb5_AD_Logging({"help": help, "json":json});
+	output += "\n" + PaloaltoGlobalProtect({"help": help, "json":json});
+	output += "\n" + Forcepoint_DLP_Information({"help": help, "json":json});
 	return output;
 }
