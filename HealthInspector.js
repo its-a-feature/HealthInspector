@@ -34,14 +34,14 @@ function file_exists(path){
 	return fileManager.fileExistsAtPath($(path));
 }
 //-------------------------------------------------
-function Persistent_Dock_Apps({help=false, json=false} = {}){
+function Persistent_Dock_Apps({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.dock.plist")){
 		if(json==false){
 			return "**************************************\n" + "**** Persistent Dock Applications ****\n" + "**************************************\n" + "Required file not found";
@@ -69,14 +69,14 @@ function Persistent_Dock_Apps({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Spaces_Check({help=false, json=false} = {}){
+function Spaces_Check({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.spaces.plist")){
 		if(json==false){
 			return "**************************************\n" + "******** Desktops Information ********\n" + "**************************************\n" + "Required file not found";
@@ -112,13 +112,13 @@ function Spaces_Check({help=false, json=false} = {}){
 	}
 	
 	return output;}
-function Get_Office_Email({help=false, json=false} = {}){
+function Get_Office_Email({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
 		return output;
 	}
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.microsoft.office.plist")){
 		if(json==false){
 			return "**************************************\n" + "****** Registered Office Email ******\n" + "**************************************\n" + "Required file not found";
@@ -139,14 +139,14 @@ function Get_Office_Email({help=false, json=false} = {}){
 		}
 	}
 	return output;}
-function Saved_Printers({help=false, json=false} = {}){
+function Saved_Printers({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/org.cups.PrintingPrefs.plist")){
 		if(json==false){
 			return "**************************************\n" + "********* Last Used Printers *********\n" + "**************************************\n" + "Required file not found";
@@ -158,9 +158,11 @@ function Saved_Printers({help=false, json=false} = {}){
 	let contents = ObjC.deepUnwrap(dict);
 	output['LastUsedPrinters'] = [];
 	if(contents != undefined){
-		for(let i = 0; i < contents['LastUsedPrinters'].length; i++){
-			output['LastUsedPrinters'].push({"Network": contents['LastUsedPrinters'][i]['Network'],
-											 "PrinterID": contents['LastUsedPrinters'][i]['PrinterID']});
+		if(contents.hasOwnProperty('LastUsedPrinters')){
+			for(let i = 0; i < contents['LastUsedPrinters'].length; i++){
+				output['LastUsedPrinters'].push({"Network": contents['LastUsedPrinters'][i]['Network'],
+												 "PrinterID": contents['LastUsedPrinters'][i]['PrinterID']});
+			}
 		}
 		if(json==false){
 			output = "**************************************\n" + "********* Last Used Printers *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
@@ -170,14 +172,14 @@ function Saved_Printers({help=false, json=false} = {}){
 		}
 	}	
 	return output;}
-function Finder_Preferences({help=false, json=false} = {}){
+function Finder_Preferences({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.finder.plist")){
 		if(json==false){
 			return "**************************************\n" + "** Recent Folders and Finder Prefs **\n" + "**************************************\n" + "Required file not found";
@@ -205,14 +207,14 @@ function Finder_Preferences({help=false, json=false} = {}){
 	}
 	
 	return output;}
-function Launch_Services({help=false, json=false} = {}){
+function Launch_Services({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist")){
 		if(json==false){
 			return "**************************************\n" + "*** Custom LaunchServices Handlers ***\n" + "**************************************\n" + "Required file not found";
@@ -249,7 +251,7 @@ function Launch_Services({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Universal_Access_Auth_Warning({help=false, json=false} = {}){
+function Universal_Access_Auth_Warning({help=false, json=false, user=""} = {}){
 	// information on all apps that macOS has ever thrown the ‘some.app would like permission to control your computer
 	if(help){
 	    let output = "";
@@ -257,7 +259,7 @@ function Universal_Access_Auth_Warning({help=false, json=false} = {}){
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.universalaccessAuthWarning.plist")){
 		if(json==false){
 			return "**************************************\n" + "**** UniversalAccess Auth Warning ****\n" + "**************************************\n" + "Required file not found";
@@ -277,14 +279,14 @@ function Universal_Access_Auth_Warning({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Relaunch_At_Login({help=false, json=false} = {}){
+function Relaunch_At_Login({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/Preferences/ByHost", Ref()));
 	output['Relaunch Apps'] = [];
 	for(i in files){
@@ -301,14 +303,14 @@ function Relaunch_At_Login({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Login_Items({help=false, json=false} = {}){
+function Login_Items({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/com.apple.loginitems.plist")){
 		if(json==false){
 			return "**************************************\n" + "************ Login Items ************\n" + "**************************************\n" + "Required file not found";
@@ -328,14 +330,14 @@ function Login_Items({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function User_Dir_Hidden_Files_Folders({help=false, json=false} = {}){
+function User_Dir_Hidden_Files_Folders({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = [];
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath, Ref()));
 	for(i in files){
 		if(files[i][0] == "."){
@@ -349,14 +351,14 @@ function User_Dir_Hidden_Files_Folders({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function User_Global_Preferences({help=false, json=false} = {}){
+function User_Global_Preferences({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Preferences/.GlobalPreferences.plist")){
 		if(json==false){
 			return "**************************************\n" + "***** User's Global Preferences *****\n" + "**************************************\n" + "Required file not found";
@@ -381,14 +383,14 @@ function User_Global_Preferences({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function User_Launchagents({help=false, json=false} = {}){
+function User_Launchagents({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchAgents/", Ref()));
 	for(i in files){
 		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchAgents/" + files[i]);
@@ -417,14 +419,14 @@ function User_Launchagents({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function User_Launchdaemons({help=false, json=false} = {}){
+function User_Launchdaemons({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchDaemons/", Ref()));
 	for(i in files){
 		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LauncDaemons/" + files[i]);
@@ -453,7 +455,7 @@ function User_Launchdaemons({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Installed_Software_Versions({help=false, json=false} = {}){
+function Installed_Software_Versions({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -488,7 +490,7 @@ function Installed_Software_Versions({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Local_Account_File({help=false, json=false} = {}){
+function Local_Account_File({help=false, json=false, user=""} = {}){
 	//Note: this file will probably only exist for mobile accounts tied to AD
 	if(help){
 	    let output = "";
@@ -496,7 +498,7 @@ function Local_Account_File({help=false, json=false} = {}){
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/.account")){
 		if(json==false){
 			return "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + "Required file not found";
@@ -514,14 +516,14 @@ function Local_Account_File({help=false, json=false} = {}){
 	}
 	return output;}
 // ----------- user data mining functions -------------
-function Unique_Bash_History_Sessions({help=false, json=false} = {}){
+function Unique_Bash_History_Sessions({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.bash_sessions/", Ref()));
 	let final_commands = new Set();
 	for(i in files){
@@ -545,14 +547,14 @@ function Unique_Bash_History_Sessions({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function SSH_Keys({help=false, json=false} = {}){
+function SSH_Keys({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/.ssh", Ref()));
 	for(i in files){
 		let dict = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.ssh/" + files[i], $.NSUTF8StringEncoding, $());
@@ -567,7 +569,7 @@ function SSH_Keys({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Read_Local_Group_Lists({help=false, json=false} = {}){
+function Read_Local_Group_Lists({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -597,14 +599,14 @@ function Read_Local_Group_Lists({help=false, json=false} = {}){
 	}
 	
 	return output;}
-function Slack_Download_Cache_History({help=false, json=false} = {}){
+function Slack_Download_Cache_History({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Application Support/Slack/storage/slack-downloads")){
 		if(json==false){
 			return "**************************************\n" + "********* Slack Downloads *********\n" + "**************************************\n" + "Required file not found";
@@ -631,14 +633,14 @@ function Slack_Download_Cache_History({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Slack_Team_Information({help=false, json=false} = {}){
+function Slack_Team_Information({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	if(!file_exists(currentUserPath + "/Library/Application Support/Slack/storage/slack-teams")){
 		if(json==false){
 			return "**************************************\n" + "********* Slack Team Info *********\n" + "**************************************\n" + "Required file not found";
@@ -663,14 +665,14 @@ function Slack_Team_Information({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Recent_Files({help=false, json=false} = {}){
+function Recent_Files({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
 	}
 	let output = {};
 	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;
+	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	output['Recent Applications'] = [];
 	if(!file_exists(currentUserPath + "/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2")){
 		if(json==false){
@@ -701,7 +703,7 @@ function Recent_Files({help=false, json=false} = {}){
 	}
 	return output;}
 //------------ globally readable plists with interesting info ------------------
-function Firewall({help=false, json=false} = {}){
+function Firewall({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -755,7 +757,7 @@ function Firewall({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Airport_Preferences({help=false, json=false} = {}){
+function Airport_Preferences({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -798,7 +800,7 @@ function Airport_Preferences({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function SMB_Server({help=false, json=false} = {}){
+function SMB_Server({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -824,7 +826,7 @@ function SMB_Server({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function WiFi_Messages({help=false, json=false} = {}){
+function WiFi_Messages({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -864,7 +866,7 @@ function WiFi_Messages({help=false, json=false} = {}){
 		
 	}
 	return output;}
-function Network_Interfaces({help=false, json=false} = {}){
+function Network_Interfaces({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -895,7 +897,7 @@ function Network_Interfaces({help=false, json=false} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Bluetooth_Connections({help=false, json=false} = {}){
+function Bluetooth_Connections({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -930,8 +932,10 @@ function Bluetooth_Connections({help=false, json=false} = {}){
 			output['Device Cache'].push({"Name": name, "Class of Device": ClassOfDevice, "Last Connected": lastConnected, "Last Updated": lastNameUpdate, "Display Name": displayName})
 		}
 		output['Currently Paired Devices'] = [];
-		for(let i = 0; i < contents['PairedDevices'].length; i++){
-			output['Currently Paired Devices'].push(string_to_name[contents['PairedDevices'][i]]);
+		if(contents.hasOwnProperty('PairedDevices')){
+			for(let i = 0; i < contents['PairedDevices'].length; i++){
+				output['Currently Paired Devices'].push(string_to_name[contents['PairedDevices'][i]]);
+			}
 		}
 		if(json==false){
 			output = "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Convert Class of Device with: http://domoticx.com/bluetooth-class-of-device-list-cod/\n" + JSON.stringify(output, null , 1);
@@ -941,7 +945,7 @@ function Bluetooth_Connections({help=false, json=false} = {}){
 		}
 	}	
 	return output;}
-function OS_Version({help=false, json=false} = {}){
+function OS_Version({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -965,7 +969,7 @@ function OS_Version({help=false, json=false} = {}){
 	}
 	
 	return output;}
-function Krb5_AD_Config({help=false, json=false}){
+function Krb5_AD_Config({help=false, json=false, user=""}){
 	if(help){
 	    let output = "";
 		return output;
@@ -989,7 +993,7 @@ function Krb5_AD_Config({help=false, json=false}){
 	}
 	
 	return output;}
-function Krb5_AD_Logging({help=false, json=false} = {}){
+function Krb5_AD_Logging({help=false, json=false, user=""} = {}){
 	if(help){
 	    let output = "";
 		return output;
@@ -1014,7 +1018,7 @@ function Krb5_AD_Logging({help=false, json=false} = {}){
 	
 	return output;}
 
-function PaloaltoGlobalProtect({help=false, json=false} = {}){
+function PaloaltoGlobalProtect({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
 		return output;
@@ -1041,7 +1045,7 @@ function PaloaltoGlobalProtect({help=false, json=false} = {}){
 
 	return output;}
 
-function Forcepoint_DLP_Information({help=false, json=false} = {}){
+function Forcepoint_DLP_Information({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
 		return output;
@@ -1078,72 +1082,75 @@ function Forcepoint_DLP_Information({help=false, json=false} = {}){
 	return output;}
 
 //---------------------------------------------------------
-function All_Checks({help=false, json=false} = {}){
+function All_Checks({help=false, json=false, user=""} = {}){
 	let output = "";
-	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
-	output += "\n" + Spaces_Check({"help":help, "json":json});
-	output += "\n" + Get_Office_Email({"help":help, "json":json});
-	output += "\n" + Saved_Printers({"help":help, "json":json});
-	output += "\n" + Finder_Preferences({"help":help, "json":json});
-	output += "\n" + Launch_Services({"help":help, "json":json});
-	output += "\n" + Universal_Access_Auth_Warning({"help":help, "json":json});
-	output += "\n" + Relaunch_At_Login({"help":help, "json":json});
-	output += "\n" + Login_Items({"help":help, "json":json});
-	output += "\n" + User_Dir_Hidden_Files_Folders({"help":help, "json":json});
-	output += "\n" + User_Global_Preferences({"help":help, "json":json});
-	output += "\n" + User_Launchagents({"help":help, "json":json});
-	output += "\n" + User_Launchdaemons({"help":help, "json":json});
-	output += "\n" + Installed_Software_Versions({"help":help, "json":json});
-	output += "\n" + Local_Account_File({"help":help, "json":json});
-	output += "\n" + Unique_Bash_History_Sessions({"help":help, "json":json});
-	output += "\n" + SSH_Keys({"help":help, "json":json});
-	output += "\n" + Read_Local_Group_Lists({"help":help, "json":json});
-	output += "\n" + Slack_Download_Cache_History({"help":help, "json":json});
-	output += "\n" + Slack_Team_Information({"help":help, "json":json});
-	output += "\n" + Recent_Files({"help":help, "json":json});
-	output += "\n" + Firewall({"help":help, "json":json});
-	output += "\n" + Airport_Preferences({"help":help, "json":json});
-	output += "\n" + SMB_Server({"help":help, "json":json});
-	output += "\n" + WiFi_Messages({"help":help, "json":json});
-	output += "\n" + Network_Interfaces({"help":help, "json":json});
-	output += "\n" + Bluetooth_Connections({"help":help, "json":json});
-	output += "\n" + OS_Version({"help":help, "json":json});
-	output += "\n" + Krb5_AD_Config({"help": help, "json":json});
-	output += "\n" + Krb5_AD_Logging({"help": help, "json":json});
-	output += "\n" + PaloaltoGlobalProtect({"help": help, "json":json});
-	output += "\n" + Forcepoint_DLP_Information({"help": help, "json":json});
+	let input_parameter = {"help":help, "json":json, "user": user};
+	output += "\n" + Persistent_Dock_Apps(input_parameter);
+	output += "\n" + Spaces_Check(input_parameter);
+	output += "\n" + Get_Office_Email(input_parameter);
+	output += "\n" + Saved_Printers(input_parameter);
+	output += "\n" + Finder_Preferences(input_parameter);
+	output += "\n" + Launch_Services(input_parameter);
+	output += "\n" + Universal_Access_Auth_Warning(input_parameter);
+	output += "\n" + Relaunch_At_Login(input_parameter);
+	output += "\n" + Login_Items(input_parameter);
+	output += "\n" + User_Dir_Hidden_Files_Folders(input_parameter);
+	output += "\n" + User_Global_Preferences(input_parameter);
+	output += "\n" + User_Launchagents(input_parameter);
+	output += "\n" + User_Launchdaemons(input_parameter);
+	output += "\n" + Installed_Software_Versions(input_parameter);
+	output += "\n" + Local_Account_File(input_parameter);
+	output += "\n" + Unique_Bash_History_Sessions(input_parameter);
+	output += "\n" + SSH_Keys(input_parameter);
+	output += "\n" + Read_Local_Group_Lists(input_parameter);
+	output += "\n" + Slack_Download_Cache_History(input_parameter);
+	output += "\n" + Slack_Team_Information(input_parameter);
+	output += "\n" + Recent_Files(input_parameter);
+	output += "\n" + Firewall(input_parameter);
+	output += "\n" + Airport_Preferences(input_parameter);
+	output += "\n" + SMB_Server(input_parameter);
+	output += "\n" + WiFi_Messages(input_parameter);
+	output += "\n" + Network_Interfaces(input_parameter);
+	output += "\n" + Bluetooth_Connections(input_parameter);
+	output += "\n" + OS_Version(input_parameter);
+	output += "\n" + Krb5_AD_Config(input_parameter);
+	output += "\n" + Krb5_AD_Logging(input_parameter);
+	output += "\n" + PaloaltoGlobalProtect(input_parameter);
+	output += "\n" + Forcepoint_DLP_Information(input_parameter);
 	return output;
 }
-function User_Preferences({help=false, json=false} = {}){
+function User_Preferences({help=false, json=false, user=""} = {}){
 	let output = "";
-	output += "\n" + Persistent_Dock_Apps({"help":help, "json":json});
-	output += "\n" + Spaces_Check({"help":help, "json":json});
-	output += "\n" + Get_Office_Email({"help":help, "json":json});
-	output += "\n" + Saved_Printers({"help":help, "json":json});
-	output += "\n" + Finder_Preferences({"help":help, "json":json});
-	output += "\n" + Launch_Services({"help":help, "json":json});
-	output += "\n" + Universal_Access_Auth_Warning({"help":help, "json":json});
-	output += "\n" + Relaunch_At_Login({"help":help, "json":json});
-	output += "\n" + Global_Preferences({"help":help, "json":json});
-	output += "\n" + OS_Version({"help":help, "json":json});
-	output += "\n" + Installed_Software_Versions({"help":help, "json":json});
-	output += "\n" + User_Launchagents({"help":help, "json":json});
-	output += "\n" + User_Launchdaemons({"help":help, "json":json});
-	output += "\n" + Slack_Download_Cache_History({"help":help, "json":json});
-	output += "\n" + Slack_Team_Information({"help":help, "json":json});
+	let input_parameters = {"help":help, "json":json, "user": user};
+	output += "\n" + Persistent_Dock_Apps(input_parameters);
+	output += "\n" + Spaces_Check(input_parameters);
+	output += "\n" + Get_Office_Email(input_parameters);
+	output += "\n" + Saved_Printers(input_parameters);
+	output += "\n" + Finder_Preferences(input_parameters);
+	output += "\n" + Launch_Services(input_parameters);
+	output += "\n" + Universal_Access_Auth_Warning(input_parameters);
+	output += "\n" + Relaunch_At_Login(input_parameters);
+	output += "\n" + Global_Preferences(input_parameters);
+	output += "\n" + OS_Version(input_parameters);
+	output += "\n" + Installed_Software_Versions(input_parameters);
+	output += "\n" + User_Launchagents(input_parameters);
+	output += "\n" + User_Launchdaemons(input_parameters);
+	output += "\n" + Slack_Download_Cache_History(input_parameters);
+	output += "\n" + Slack_Team_Information(input_parameters);
 	return output;
 }
-function Global_Preferences({help=false, json=false} = {}){
+function Global_Preferences({help=false, json=false, user=""} = {}){
 	let output = "";
-	output += "\n" + Firewall({"help":help, "json":json});
-	output += "\n" + Airport_Preferences({"help":help, "json":json});
-	output += "\n" + SMB_Server({"help":help, "json":json});
-	output += "\n" + WiFi_Messages({"help":help, "json":json});
-	output += "\n" + Network_Interfaces({"help":help, "json":json});
-	output += "\n" + Bluetooth_Connections({"help":help, "json":json});
-	output += "\n" + Krb5_AD_Config({"help": help, "json":json});
-	output += "\n" + Krb5_AD_Logging({"help": help, "json":json});
-	output += "\n" + PaloaltoGlobalProtect({"help": help, "json":json});
-	output += "\n" + Forcepoint_DLP_Information({"help": help, "json":json});
+	let input_parameters = {"help":help, "json":json, "user": user};
+	output += "\n" + Firewall(input_parameters);
+	output += "\n" + Airport_Preferences(input_parameters);
+	output += "\n" + SMB_Server(input_parameters);
+	output += "\n" + WiFi_Messages(input_parameters);
+	output += "\n" + Network_Interfaces(input_parameters);
+	output += "\n" + Bluetooth_Connections(input_parameters);
+	output += "\n" + Krb5_AD_Config(input_parameters);
+	output += "\n" + Krb5_AD_Logging(input_parameters);
+	output += "\n" + PaloaltoGlobalProtect(input_parameters);
+	output += "\n" + Forcepoint_DLP_Information(input_parameters);
 	return output;
 }
