@@ -429,9 +429,9 @@ function User_Launchdaemons({help=false, json=false, user=""} = {}){
 	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
 	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError(currentUserPath + "/Library/LaunchDaemons/", Ref()));
 	for(i in files){
-		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LauncDaemons/" + files[i]);
+		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/Library/LaunchDaemons/" + files[i]);
 		dict = ObjC.deepUnwrap(dict);
-		if(dict != undefined && dict.hasOwnProperty('ProgramArguments')){
+		if(dict != undefined && dict.hasOwnProperty('ProgramArguments') && dict['ProgramArguments'].length > 0){
             dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
             program_dir = dict['ProgramArguments'][0].split("/");
             program_dir.pop();
@@ -452,6 +452,42 @@ function User_Launchdaemons({help=false, json=false, user=""} = {}){
 		output = "**************************************\n" + "***** User's Launch Daemons *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	}else{
 		output['HealthInspectorCommand'] = "User_Launchdaemons";
+		output = JSON.stringify(output, null, 1);
+	}
+	return output;}
+function System_Launchdaemons({help=false, json=false, user=""} = {}){
+	if(help){
+	    let output = "";
+		return output;
+	}
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	let files = ObjC.deepUnwrap(fileManager.contentsOfDirectoryAtPathError("/Library/LaunchDaemons/", Ref()));
+	for(i in files){
+		let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/LaunchDaemons/" + files[i]);
+		dict = ObjC.deepUnwrap(dict);
+		if(dict != undefined && dict.hasOwnProperty('ProgramArguments') && dict['ProgramArguments'].length > 0){
+            dict['Program Attributes'] = get_permissions(dict['ProgramArguments'][0]);
+            program_dir = dict['ProgramArguments'][0].split("/");
+            program_dir.pop();
+            program_dir = "/" + program_dir.join("/");
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
+		}
+		else if(dict !== undefined && dict.hasOwnProperty('Program')){
+			dict['Program Attributes'] = get_permissions(dict['Program']);
+            program_dir = dict['Program'].split("/");
+            program_dir.pop();
+            program_dir = program_dir.join("/");
+            console.log(program_dir);
+            dict['Program Directory Attributes'] = get_permissions(program_dir);
+		}
+		output[files[i]] = dict;
+		 
+	}
+	if(json==false){
+		output = "**************************************\n" + "***** System Launch Daemons *****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "System_Launchdaemons";
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
@@ -1098,6 +1134,7 @@ function All_Checks({help=false, json=false, user=""} = {}){
 	output += "\n" + User_Global_Preferences(input_parameter);
 	output += "\n" + User_Launchagents(input_parameter);
 	output += "\n" + User_Launchdaemons(input_parameter);
+	output += "\n" + System_Launchdaemons(input_parameter);
 	output += "\n" + Installed_Software_Versions(input_parameter);
 	output += "\n" + Local_Account_File(input_parameter);
 	output += "\n" + Unique_Bash_History_Sessions(input_parameter);
