@@ -1116,6 +1116,35 @@ function Forcepoint_DLP_Information({help=false, json=false, user=""} = {}){
 	}
 
 	return output;}
+function Jamf_Information({help=false, json=false, user=""} = {}){
+	if(help){
+		let output = "";
+		return output;
+	}
+	let output = {};
+	let fileManager = $.NSFileManager.defaultManager;
+	if(!file_exists("/Library/Preferences/com.jamfsoftware.jamf.plist")){
+		if(json==false){
+			return "**************************************\n" + "********** Jamf Information  **********\n" + "**************************************\n" + "Required file not found";
+		}else{
+			return JSON.stringify({"HealthInspectorCommand": "Jamf_Information"});
+		}
+	}
+	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.jamfsoftware.jamf.plist");
+	let contents = ObjC.deepUnwrap(dict);
+	output['JAMF Software Server (JSS) Url'] = contents['jss_url'];
+	output['Azure Active Directory Enabled'] = contents['microsoftCAEnabled'];
+	output['Azure Tenant Domain Name'] = contents['microsoftCATenantDomainName'];
+	output['Self Service App Path'] = contents['self_service_app_path'];
+	output['SSL Verification'] = contents['verifySSLCert'];
+	if(json==false){
+		output = "********************************\n" + "***** Jamf Info *****\n" + "********************************\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Jamf_Information";
+		output = JSON.stringify(output, null, 1);
+	}
+
+	return output;}
 
 //---------------------------------------------------------
 function All_Checks({help=false, json=false, user=""} = {}){
@@ -1154,6 +1183,7 @@ function All_Checks({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameter);
 	output += "\n" + PaloaltoGlobalProtect(input_parameter);
 	output += "\n" + Forcepoint_DLP_Information(input_parameter);
+	output += "\n" + Jamf_Information(input_parameter);
 	return output;
 }
 function User_Preferences({help=false, json=false, user=""} = {}){
@@ -1189,5 +1219,6 @@ function Global_Preferences({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameters);
 	output += "\n" + PaloaltoGlobalProtect(input_parameters);
 	output += "\n" + Forcepoint_DLP_Information(input_parameters);
+	output += "\n" + Jamf_Information(input_parameter);
 	return output;
 }
