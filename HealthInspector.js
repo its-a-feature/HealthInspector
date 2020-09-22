@@ -61,6 +61,8 @@ function Persistent_Dock_Apps({help=false, json=false, user=""} = {}){
 		output['persistent-dock-apps'].push({"label": contents['persistent-others'][i]['tile-data']['file-label'],
 											 "bundle": contents['persistent-others'][i]['tile-data']['bundle-identifier']});
 	}
+	output['show-recents'] = contents['show-recents'];
+	output['recent-apps'] = contents['recent-apps'];
 	if(json==false){
 		output = "**************************************\n" + "**** Persistent Dock Applications ****\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	} 
@@ -195,10 +197,14 @@ function Finder_Preferences({help=false, json=false, user=""} = {}){
 	output['Show Removable Media on Desktop'] = contents['ShowRemovableMediaOnDesktop'];
 	output['Tag Names'] = contents['FavoriteTagNames'];
 	output['Recent Folders'] = [];
-	for(let i = 0; i < contents['FXRecentFolders'].length; i++){
-		output['Recent Folders'].push(contents['FXRecentFolders'][i]['name']);
+	if('FXRecentFolders' in contents){
+		for(let i = 0; i < contents['FXRecentFolders'].length; i++){
+			output['Recent Folders'].push(contents['FXRecentFolders'][i]['name']);
+		}
 	}
-	output['Prior Mounted Volumes'] = Object.keys(contents['FXDesktopVolumePositions']);
+	if('FXDesktopVolumePositions' in contents){
+		output['Prior Mounted Volumes'] = Object.keys(contents['FXDesktopVolumePositions']);
+	}
 	if(json==false){
 		output = "**************************************\n" + "** Recent Folders and Finder Prefs **\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	}else{
@@ -526,31 +532,6 @@ function Installed_Software_Versions({help=false, json=false, user=""} = {}){
 		output = JSON.stringify(output, null, 1);
 	}
 	return output;}
-function Local_Account_File({help=false, json=false, user=""} = {}){
-	//Note: this file will probably only exist for mobile accounts tied to AD
-	if(help){
-	    let output = "";
-		return output;
-	}
-	let output = {};
-	let fileManager = $.NSFileManager.defaultManager;
-	let currentUserPath = ""; if(user === ""){currentUserPath = fileManager.homeDirectoryForCurrentUser.fileSystemRepresentation;}else{currentUserPath = "/Users/" + user;}
-	if(!file_exists(currentUserPath + "/.account")){
-		if(json==false){
-			return "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + "Required file not found";
-		}else{
-			return JSON.stringify({"HealthInspectorCommand": "Local_Account_File"});
-		}
-	}
-	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile(currentUserPath + "/.account");
-	let contents = ObjC.deepUnwrap(dict);
-	if(json==false){
-		output = "**************************************\n" + "******** Local .account File  ********\n" + "**************************************\n" + JSON.stringify(contents, null , 1);
-	}else{
-		output['HealthInspectorCommand'] = "Local_Account_File";
-		output = JSON.stringify(output, null, 1);
-	}
-	return output;}
 // ----------- user data mining functions -------------
 function Unique_Bash_History_Sessions({help=false, json=false, user=""} = {}){
 	if(help){
@@ -569,6 +550,13 @@ function Unique_Bash_History_Sessions({help=false, json=false, user=""} = {}){
 		}
 	}
 	let list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.bash_history", $.NSUTF8StringEncoding, $()).js;
+	if(list != undefined){
+		list = list.split("\n");
+		for(let j in list){
+			final_commands.add(list[j]);
+		}
+	}
+	list = $.NSString.alloc.initWithContentsOfFileEncodingError(currentUserPath + "/.zsh_history", $.NSUTF8StringEncoding, $()).js;
 	if(list != undefined){
 		list = list.split("\n");
 		for(let j in list){
@@ -604,36 +592,6 @@ function SSH_Keys({help=false, json=false, user=""} = {}){
 		output['HealthInspectorCommand'] = "SSH_Keys";
 		output = JSON.stringify(output, null, 1);
 	}
-	return output;}
-function Read_Local_Group_Lists({help=false, json=false, user=""} = {}){
-	if(help){
-	    let output = "";
-		return output;
-	}
-	let output = {};
-	let fileManager = $.NSFileManager.defaultManager;
-	if(!file_exists("/private/etc/group")){
-		if(json==false){
-			return "**************************************\n" + "********* Local Groups *********\n" + "**************************************\n" + "Required file not found";
-		}else{
-			return JSON.stringify({"HealthInspectorCommand": "Read_Local_Group_Lists"});
-		}
-	}
-	let dict = $.NSString.alloc.initWithContentsOfFileEncodingError("/private/etc/group", $.NSUTF8StringEncoding, $()).js.split("\n");
-	let lines = [];
-	for(let i in dict){
-		if(!dict[i].includes("#")){
-			lines.push(dict[i]);
-		}
-	}
-	output["Groups"] = lines;
-	if(json==false){
-		output = "**************************************\n" + "********* Local Groups *********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
-	}else{
-		output['HealthInspectorCommand'] = "Read_Local_Group_Lists";
-		output = JSON.stringify(output, null, 1);
-	}
-	
 	return output;}
 function Slack_Download_Cache_History({help=false, json=false, user=""} = {}){
 	if(help){
@@ -755,37 +713,17 @@ function Firewall({help=false, json=false, user=""} = {}){
 	}
 	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.alf.plist");
 	let contents = ObjC.deepUnwrap(dict);
-	output['Exceptions'] = [];
-	for(let i = 0; i < contents['exceptions'].length; i++){
-		if(contents['exceptions'][i].hasOwnProperty('bundleid')){
-			let item = {};
-			item['path'] = contents['exceptions'][i]['path'];
-			item['bundleID'] = contents['exceptions'][i]['bundleid'];
-			output['Exceptions'].push(item);
-		}
-		else{
-			output['Exceptions'].push(contents['exceptions'][i]['path']);
-		}
-	}
-	output['Explicit Auths'] = [];
-	for(let i = 0; i < contents['explicitauths'].length; i++){
-		output['Explicit Auths'].push(contents['explicitauths'][i]['id']);
-	}
 	output['Global State'] = contents['globalstate'];
-	firewall_keys = Object.keys(contents['firewall']);
-	for(i in firewall_keys){
-		let status = contents['firewall'][firewall_keys[i]]['state'];
-		output[firewall_keys[i]] = {};
-		if(status == 0){
-			output[firewall_keys[i]]['status'] = "Disabled";
-		}else{
-			output[firewall_keys[i]]['status'] = "Enabled";
-		}
-		output[firewall_keys[i]]['Process'] = contents['firewall'][firewall_keys[i]]['proc'];
-		output[firewall_keys[i]]['BundleID'] = contents['firewall'][firewall_keys[i]]['servicebundleid'];
-	}
 	output['Stealth Enabled'] = contents['stealthenabled'];
 	output['Logging'] = contents['loggingenabled'];
+	dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.ARDAgent.plist");
+	output['ARDAgent'] = ObjC.deepUnwrap(dict);
+	dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.RemoteDesktop.plist");
+	output['RemoteDesktop'] = ObjC.deepUnwrap(dict);
+	dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.RemoteManagement.plist");
+	output['RemoteManagement'] = ObjC.deepUnwrap(dict);
+	dict = $.NSString.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.VNCSettings.txt");
+	output['VNCSettings'] = ObjC.deepUnwrap(dict);
 	if(json==false){
 		output = "**************************************\n" + "******* Firewall Preferences *******\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	}else{
@@ -973,12 +911,12 @@ function Bluetooth_Connections({help=false, json=false, user=""} = {}){
 				output['Currently Paired Devices'].push(string_to_name[contents['PairedDevices'][i]]);
 			}
 		}
-		if(json==false){
-			output = "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Convert Class of Device with: http://domoticx.com/bluetooth-class-of-device-list-cod/\n" + JSON.stringify(output, null , 1);
-		}else{
-			output['HealthInspectorCommand'] = "Bluetooth_Connections";
-			output = JSON.stringify(output, null, 1);
-		}
+	}
+	if(json==false){
+		output = "**************************************\n" + "******* Bluetooth Connections *******\n" + "**************************************\n" + "Convert Class of Device with: http://domoticx.com/bluetooth-class-of-device-list-cod/\n" + JSON.stringify(output, null , 1);
+	}else{
+		output['HealthInspectorCommand'] = "Bluetooth_Connections";
+		output = JSON.stringify(output, null, 1);
 	}	
 	return output;}
 function OS_Version({help=false, json=false, user=""} = {}){
@@ -997,6 +935,8 @@ function OS_Version({help=false, json=false, user=""} = {}){
 	}
 	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/System/Library/CoreServices/SystemVersion.plist");
 	output = ObjC.deepUnwrap(dict);
+	dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.apple.SoftwareUpdate.plist");
+	output['SoftwareUpdate'] = ObjC.deepUnwrap(dict);
 	if(json==false){
 		output = "**************************************\n" + "********** OS Version Info  **********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
 	}else{
@@ -1116,35 +1056,6 @@ function Forcepoint_DLP_Information({help=false, json=false, user=""} = {}){
 	}
 
 	return output;}
-function Jamf_Information({help=false, json=false, user=""} = {}){
-	if(help){
-		let output = "";
-		return output;
-	}
-	let output = {};
-	let fileManager = $.NSFileManager.defaultManager;
-	if(!file_exists("/Library/Preferences/com.jamfsoftware.jamf.plist")){
-		if(json==false){
-			return "**************************************\n" + "********** Jamf Information  **********\n" + "**************************************\n" + "Required file not found";
-		}else{
-			return JSON.stringify({"HealthInspectorCommand": "Jamf_Information"});
-		}
-	}
-	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/com.jamfsoftware.jamf.plist");
-	let contents = ObjC.deepUnwrap(dict);
-	output['JAMF Software Server (JSS) Url'] = contents['jss_url'];
-	output['Azure Active Directory Enabled'] = contents['microsoftCAEnabled'];
-	output['Azure Tenant Domain Name'] = contents['microsoftCATenantDomainName'];
-	output['Self Service App Path'] = contents['self_service_app_path'];
-	output['SSL Verification'] = contents['verifySSLCert'];
-	if(json==false){
-		output = "********************************\n" + "***** Jamf Info *****\n" + "********************************\n" + JSON.stringify(output, null , 1);
-	}else{
-		output['HealthInspectorCommand'] = "Jamf_Information";
-		output = JSON.stringify(output, null, 1);
-	}
-
-	return output;}
 
 //---------------------------------------------------------
 function All_Checks({help=false, json=false, user=""} = {}){
@@ -1165,10 +1076,8 @@ function All_Checks({help=false, json=false, user=""} = {}){
 	output += "\n" + User_Launchdaemons(input_parameter);
 	output += "\n" + System_Launchdaemons(input_parameter);
 	output += "\n" + Installed_Software_Versions(input_parameter);
-	output += "\n" + Local_Account_File(input_parameter);
 	output += "\n" + Unique_Bash_History_Sessions(input_parameter);
 	output += "\n" + SSH_Keys(input_parameter);
-	output += "\n" + Read_Local_Group_Lists(input_parameter);
 	output += "\n" + Slack_Download_Cache_History(input_parameter);
 	output += "\n" + Slack_Team_Information(input_parameter);
 	output += "\n" + Recent_Files(input_parameter);
@@ -1183,7 +1092,6 @@ function All_Checks({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameter);
 	output += "\n" + PaloaltoGlobalProtect(input_parameter);
 	output += "\n" + Forcepoint_DLP_Information(input_parameter);
-	output += "\n" + Jamf_Information(input_parameter);
 	return output;
 }
 function User_Preferences({help=false, json=false, user=""} = {}){
@@ -1219,6 +1127,5 @@ function Global_Preferences({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameters);
 	output += "\n" + PaloaltoGlobalProtect(input_parameters);
 	output += "\n" + Forcepoint_DLP_Information(input_parameters);
-	output += "\n" + Jamf_Information(input_parameter);
 	return output;
 }
