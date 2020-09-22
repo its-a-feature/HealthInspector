@@ -31,13 +31,11 @@ The current list of functions and associated files is below:
 | User_Launchagents | Information about the user's launch agents | ~/Library/LaunchAgents/* | 
 | User_Launchdaemons | Information about the user's launch daemons|  ~/Library/LaunchDaemons/*| 
 | Installed_Software_Versions | Installed software versions, install date, and process name |/Library/Receipts/InstallHistory.plist | 
-| Local_Account_File | |~/.account | 
-| Unique_Bash_History_Sessions | Reads all these files into a Set (which removes duplicates) and returns a list of all unique commands run | ~/.bash_sessions/*, ~/.bash_history | 
+| Unique_Bash_History_Sessions | Reads all these files into a Set (which removes duplicates) and returns a list of all unique commands run | ~/.bash_sessions/*, ~/.bash_history, ~/.zsh_history | 
 | SSH_Keys | Dump of all files in this folder |~/.ssh/* | 
-| Read_Local_Group_Lists | Reads all the groups and their members |/private/etc/group | 
 | Slack_Download_Cache_History | List out all Slack downloads and where they were saved to |~/Library/Application Support/Slack/storage/slack-downloads | 
 | Slack_Team_Information | Dump out information saved about all teams the user has saved |~/Library/Application Support/Slack/storage/slack-teams | 
-| Recent_Files | List of 10 most recent applications accessed by the user | ~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2| 
+| Recent_Files | List of 10 most recent applications accessed by the user. In 10.15 this now requires Full Disk Access permissions | ~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentApplications.sfl2| 
 | Firewall | List out exempted programs, explicitly authed programs, and the state of certain firewall groups |/Library/Preferences/com.apple.alf.plist | 
 | Airport_Preferences | Details about all WiFi networks you've connected to and which other ones were nearby that you also connected to | /Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist| 
 | SMB_Server | Kerberos Realm, NetBios name, Host description| /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist| 
