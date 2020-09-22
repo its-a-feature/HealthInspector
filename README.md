@@ -25,7 +25,7 @@ The current list of functions and associated files is below:
 | Launch_Services | Mappings of programs to URL schemas and programs to file extensions | ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist| 
 | Universal_Access_Auth_Warning | List of programs that have caused a universal access prompt | ~/Library/Preferences/com.apple.universalaccessAuthWarning.plist| 
 | Relaunch_At_Login | Applications that are open now and will potentially be re-opened after reboot | ~/Library/Preferences/ByHost/*.com.apple.loginwindow.plist | 
-| LoginItems | Login Items | ~/Library/Preferences/com.apple.loginitems.plist| 
+| Login_Items | Login Items | ~/Library/Preferences/com.apple.loginitems.plist| 
 | User_Dir_Hidden_Files_Folders | Look for all hidden files and folders in the user's home directory | ~/ | 
 | User_Global_Preferences |Show all extensions, finder extensions, recent places, and default browser |~/Library/Preferences/.GlobalPreferences.plist | 
 | User_Launchagents | Information about the user's launch agents | ~/Library/LaunchAgents/* | 
