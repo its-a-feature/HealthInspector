@@ -30,8 +30,9 @@ The current list of functions and associated files is below:
 | Login_Items | Login Items | ~/Library/Preferences/com.apple.loginitems.plist| 
 | User_Dir_Hidden_Files_Folders | Look for all hidden files and folders in the user's home directory | ~/ | 
 | User_Global_Preferences |Show all extensions, finder extensions, recent places, and default browser |~/Library/Preferences/.GlobalPreferences.plist | 
-| User_Launchagents | Information about the user's launch agents | ~/Library/LaunchAgents/* | 
-| User_Launchdaemons | Information about the user's launch daemons|  ~/Library/LaunchDaemons/*| 
+| User_Launchagents | Information about the user's launch agents (if any exist) | ~/Library/LaunchAgents/* | 
+| User_Launchdaemons | Information about the user's launch daemons (if any exist) |  ~/Library/LaunchDaemons/*| 
+| System_Launchdaemons | Information about the system's launch daemons | /Library/LaunchDaemons/*|
 | Installed_Software_Versions | Installed software versions, install date, and process name |/Library/Receipts/InstallHistory.plist | 
 | Unique_Bash_History_Sessions | Reads all these files into a Set (which removes duplicates) and returns a list of all unique commands run | ~/.bash_sessions/*, ~/.bash_history, ~/.zsh_history | 
 | SSH_Keys | Dump of all files in this folder |~/.ssh/* | 
