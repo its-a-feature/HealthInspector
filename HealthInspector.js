@@ -484,7 +484,7 @@ function System_Launchdaemons({help=false, json=false, user=""} = {}){
             program_dir = dict['Program'].split("/");
             program_dir.pop();
             program_dir = program_dir.join("/");
-            console.log(program_dir);
+            //console.log(program_dir);
             dict['Program Directory Attributes'] = get_permissions(program_dir);
 		}
 		output[files[i]] = dict;
