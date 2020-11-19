@@ -1073,7 +1073,7 @@ var output = "";
 var allapps = applist.toString();
 var b = 0;
 output += "**************************************\n";
-output += "********Security Tools Check**********\n";
+output += "*********Security Tools Check*********\n";
 output += "**************************************\n";
 if ((allapps.includes("CbOsxSensorService")) || (fileMan.fileExistsAtPath("/Applications/CarbonBlack/CbOsxSensorService"))){
         output += "[+] Carbon Black Sensor installed.\n";
