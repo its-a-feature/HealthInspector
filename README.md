@@ -46,6 +46,7 @@ The current list of functions and associated files is below:
 | Network_Interfaces | List of basic network interfaces, active, type, and user information | /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist| 
 | Bluetooth_Connections | List of bluetooth connections, when they last connected, and what class of item/name |/Library/Preferences/com.apple.Bluetooth.plist | 
 | OS_Version | Software build version, name, and normal version | /System/Library/CoreServices/SystemVersion.plist|
+| Forcepoint_DLP_Information | Returns Forcepoint Data Loss Prevention config, if present | /Library/Application Support/Websense Endpoint/DLP/DLPClient.plist | 
 | All_Checks | Do all of the above checks | |
 | User_Preferences | Do all checks related to the user specifically | |
 | Global_Preferences | Do all checks related to global preferences that don't fall in ~/ | |
