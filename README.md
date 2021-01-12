@@ -48,6 +48,7 @@ The current list of functions and associated files is below:
 | OS_Version | Software build version, name, and normal version | /System/Library/CoreServices/SystemVersion.plist|
 | Forcepoint_DLP_Information | Returns Forcepoint Data Loss Prevention config, if present | /Library/Application Support/Websense Endpoint/DLP/DLPClient.plist | 
 | Krb5_AD_Config | Returns Kerberos/AD config information, if present | /etc/krb5.conf | 
+| Krb5_AD_Logging | Returns Kerberos logging configuration, if present | /Library/Preferences/com.apple.Kerberos.plist | 
 | All_Checks | Do all of the above checks | |
 | User_Preferences | Do all checks related to the user specifically | |
 | Global_Preferences | Do all checks related to global preferences that don't fall in ~/ | |
