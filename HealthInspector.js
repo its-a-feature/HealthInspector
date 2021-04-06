@@ -1100,7 +1100,7 @@ if ((allapps.includes("xagt")) || (fileMan.fileExistsAtPath("/Library/FireEye/xa
         b = 1;
 }
 
-if ((allapps.includes("falconctl")) || (fileMan.fileExistsAtPath("/Library/CS/falcond"))){
+if ((allapps.includes("falconctl")) || (fileMan.fileExistsAtPath("/Library/CS/falcond")) || (fileMan.fileExistsAtPath("/Applications/Falcon.app"))){
         output += "[+] Crowdstrike Falcon agent found.\n";
         b = 1;
 }
