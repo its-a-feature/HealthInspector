@@ -748,24 +748,26 @@ function Airport_Preferences({help=false, json=false, user=""} = {}){
 	let dict = $.NSMutableDictionary.alloc.initWithContentsOfFile("/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist");
 	let contents = ObjC.deepUnwrap(dict);
 	output['Known Networks'] = [];
-	let wifi_keys = Object.keys(contents['KnownNetworks']);
-	let hex_to_ssid = {};
-	for(let i in wifi_keys){
-		hex_to_ssid[wifi_keys[i]] = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
-	}
-	for(let i in wifi_keys){
-		let SSID = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
-		let SecurityType = contents['KnownNetworks'][wifi_keys[i]]['SecurityType'];
-		let lastConnected = contents['KnownNetworks'][wifi_keys[i]]['LastConnected'];
-		let wasCaptive = contents['KnownNetworks'][wifi_keys[i]]['NetworkWasCaptive'];
-		let captiveBypass = contents['KnownNetworks'][wifi_keys[i]]['CaptiveBypass'];
-		let collocatedGroup = [];
-		for(let j = 0; j < contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'].length; j++){
-			collocatedGroup.push(hex_to_ssid[contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'][j]]);
+	if(contents["KnownNetworks"] !== undefined){
+		let wifi_keys = Object.keys(contents['KnownNetworks']);
+		let hex_to_ssid = {};
+		for(let i in wifi_keys){
+			hex_to_ssid[wifi_keys[i]] = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
 		}
-		output['Known Networks'].push({"SSID": SSID, "Security": SecurityType, "Last Connection": lastConnected,
-									   "Was Captive": wasCaptive, "Captive Bypass": captiveBypass,
-									   "Nearby Networks": collocatedGroup})
+		for(let i in wifi_keys){
+			let SSID = contents['KnownNetworks'][wifi_keys[i]]['SSIDString'];
+			let SecurityType = contents['KnownNetworks'][wifi_keys[i]]['SecurityType'];
+			let lastConnected = contents['KnownNetworks'][wifi_keys[i]]['LastConnected'];
+			let wasCaptive = contents['KnownNetworks'][wifi_keys[i]]['NetworkWasCaptive'];
+			let captiveBypass = contents['KnownNetworks'][wifi_keys[i]]['CaptiveBypass'];
+			let collocatedGroup = [];
+			for(let j = 0; j < contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'].length; j++){
+				collocatedGroup.push(hex_to_ssid[contents['KnownNetworks'][wifi_keys[i]]['CollocatedGroup'][j]]);
+			}
+			output['Known Networks'].push({"SSID": SSID, "Security": SecurityType, "Last Connection": lastConnected,
+										   "Was Captive": wasCaptive, "Captive Bypass": captiveBypass,
+										   "Nearby Networks": collocatedGroup})
+		}
 	}
 	if(json==false){
 		output = "**************************************\n" + "******** Airport Preferences ********\n" + "**************************************\n" + JSON.stringify(output, null , 1);
