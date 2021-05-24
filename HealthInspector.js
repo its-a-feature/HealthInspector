@@ -1159,7 +1159,7 @@ function AVEnum() {
 	}
 
 	if ((allapps.includes("dnd")) || (fileMan.fileExistsAtPath("/Library/Objective-See/DND")) || (fileMan.fileExistsAtPath("/Applications/Do Not Disturb.app/"))){
-	        output += "[+] LuLu firewall found.\n";
+	        output += "[+] Do Not Disturb 'lid open' event monitor found.\n";
 	        b = 1;
 	}
 
