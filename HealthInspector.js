@@ -1104,8 +1104,14 @@ function Forcepoint_DLP_Information({ help = false, json = false, user = "" } = 
 	return output;
 }
 
-function AVEnum() {
+function AVEnum({ help = false, json = false, user = "" } = {}) {
 	ObjC.import("AppKit");
+
+	if (help) {
+		let output = "";
+		return output;
+	}
+
 	var fileMan = $.NSFileManager.defaultManager;
 	var runapps = $.NSWorkspace.sharedWorkspace.runningApplications.js;
 	var applist = [];
@@ -1297,7 +1303,7 @@ function All_Checks({ help = false, json = false, user = "" } = {}) {
 	output += "\n" + Krb5_AD_Logging(input_parameter);
 	output += "\n" + PaloaltoGlobalProtect(input_parameter);
 	output += "\n" + Forcepoint_DLP_Information(input_parameter);
-	output += "\n" + AVEnum();
+	output += "\n" + AVEnum(input_parameter);
 	return output;
 }
 function User_Preferences({ help = false, json = false, user = "" } = {}) {
