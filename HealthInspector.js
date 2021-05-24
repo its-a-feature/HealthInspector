@@ -1126,9 +1126,13 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 
 	var allapps = applist.toString();
 	var b = 0;
-	output += "**************************************\n";
-	output += "*********Security Tools Check*********\n";
-	output += "**************************************\n";
+
+	if (json == false) {
+		output += "**************************************\n"
+		output += "*********Security Tools Check*********\n"
+		output += "**************************************\n"
+	}
+
 	if ((allapps.includes("CbOsxSensorService")) || (fileMan.fileExistsAtPath("/Applications/CarbonBlack/CbOsxSensorService"))) {
 		output += "[+] Carbon Black Sensor installed.\n";
 		b = 1;
@@ -1262,8 +1266,6 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 	if (b == 0) {
 		output += "[-] No security products found.";
 	}
-
-	output += "**************************************\n";
 	return output;
 }
 
