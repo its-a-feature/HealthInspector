@@ -1111,7 +1111,6 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 		let output = "";
 		return output;
 	}
-	var output = "";
 
 	var fileMan = $.NSFileManager.defaultManager;
 	var runapps = $.NSWorkspace.sharedWorkspace.runningApplications.js;
@@ -1120,15 +1119,8 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 		let info = {};
 		info['name'] = runapps[i].localizedName.js;
 		applist.push(info['name']);
-
 	}
 	var allapps = applist.toString();
-
-	if (json == false) {
-		output += "**************************************\n"
-		output += "*********Security Tools Check*********\n"
-		output += "**************************************\n"
-	}
 
 	var toolsInstalled = []
 
@@ -1299,7 +1291,11 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 		}
 	});
 
+	let output
 	if (json == false) {
+		output = "**************************************\n"
+		output += "*********Security Tools Check*********\n"
+		output += "**************************************\n"
 		if (toolsInstalled.length == 0) {
 			output += "[-] No security products found.";
 		} else {
@@ -1307,6 +1303,12 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 				output += "[+] " + app + " found\n"
 			});
 		}
+	} else {
+		output = {
+			HealthInspectorCommand: "AVEnum",
+			Products: toolsInstalled
+		}
+		output = JSON.stringify(output, null, 1);
 	}
 
 	return output;
