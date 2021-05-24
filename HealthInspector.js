@@ -1111,6 +1111,7 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 		let output = "";
 		return output;
 	}
+	var output = "";
 
 	var fileMan = $.NSFileManager.defaultManager;
 	var runapps = $.NSWorkspace.sharedWorkspace.runningApplications.js;
@@ -1121,8 +1122,6 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 		applist.push(info['name']);
 
 	}
-
-	var output = "";
 	var allapps = applist.toString();
 
 	if (json == false) {
@@ -1133,109 +1132,172 @@ function AVEnum({ help = false, json = false, user = "" } = {}) {
 
 	var toolsInstalled = []
 
-	if ((allapps.includes("CbOsxSensorService")) || (fileMan.fileExistsAtPath("/Applications/CarbonBlack/CbOsxSensorService"))) {
-		toolsInstalled.push("Carbon Black Sensor")
-	}
+	// knownTools defines AV/ecurity products for macOS that may be installed
+	//
+	// description - the description of the product for output
+	// allAppsIncludes - array of localized app names for the product
+	// fileExistsAtPath - array of paths, if present, indicate product installed
+	const knownTools = [
+		{
+			description: "BlockBlock persistence location monitoring tool",
+			allAppsIncludes: ["blockblock"],
+			fileExistsAtPath: ["/Applications/BlockBlock Helper.app"]
+		},
+		{
+			description: "CB Defense A/V",
+			allAppsIncludes: ["CbDefense"],
+			fileExistsAtPath: ["/Applications/Confer.app"]
+		},
+		{
+			description: "Carbon Black Sensor",
+			allAppsIncludes: ["CbOsxSensorService"],
+			fileExistsAtPath: ["/Applications/CarbonBlack/CbOsxSensorService"]
+		},
+		{
+			description: "Cisco AMP for endpoints",
+			allAppsIncludes: ["AMP-for-Endpoints"],
+			fileExistsAtPath: ["/opt/cisco/amp"]
+		},
+		{
+			description: "Crowdstrike Falcon agent",
+			allAppsIncludes: ["falconctl"],
+			fileExistsAtPath: ["/Applications/Falcon.app", "/Library/CS/falcond"]
+		},
+		{
+			description: "Do Not Disturb 'lid open' event monitor",
+			allAppsIncludes: ["dnd"],
+			fileExistsAtPath: [
+				"/Applications/Do Not Disturb.app",
+				"/Library/Objective-See/DND"
+			]
+		},
+		{
+			description: "ESET A/V",
+			allAppsIncludes: ["ESET", "eset"],
+			fileExistsAtPath: [
+				"/Library/Application Support/com.eset.remoteadministrator.agent"
+			]
+		},
+		{
+			description: "Objective See FileMonitor tool",
+			allAppsIncludes: ["filemonitor"],
+			fileExistsAtPath: ["/Applications/FileMonitor.app"]
+		},
+		{
+			description: "FireEye HX agent",
+			allAppsIncludes: ["xagt"],
+			fileExistsAtPath: ["/Library/FireEye/xagt"]
+		},
+		{
+			description: "Global Protect PAN VPN client",
+			allAppsIncludes: ["GlobalProtect", "PanGPS"],
+			fileExistsAtPath: [
+				"/Library/Logs/PaloAltoNetworks/GlobalProtect",
+				"/Library/PaloAltoNetworks"
+			]
+		},
+		{
+			description: "JAMF",
+			allAppsIncludes: [""],
+			fileExistsAtPath: ["/usr/local/bin/jamf", "/usr/local/jamf"]
+		},
+		{
+			description: "KextViewr kernel module detection tool",
+			allAppsIncludes: ["KextViewr"],
+			fileExistsAtPath: ["/Applications/KextViewr.app"]
+		},
+		{
+			description: "Knock Knock persistence detection tool",
+			allAppsIncludes: ["KnockKnock"],
+			fileExistsAtPath: ["/Applications/KnockKnock.app"]
+		},
+		{
+			description: "Littlesnitch firewall",
+			allAppsIncludes: ["Littlesnitch", "Snitch"],
+			fileExistsAtPath: ["/Library/Little Snitch/"]
+		},
+		{
+			description: "LuLu firewall",
+			allAppsIncludes: ["lulu"],
+			fileExistsAtPath: [
+				"/Library/Objective-See/Lulu",
+				"/Applications/LuLu.app"
+			]
+		},
+		{
+			description: "Malwarebytes A/V",
+			allAppsIncludes: [""],
+			fileExistsAtPath: ["/Library/Application Support/Malwarebytes"]
+		},
+		{
+			description: "Netiquette network monitoring tool",
+			allAppsIncludes: ["Netiquette"],
+			fileExistsAtPath: ["/Applications/Netiquette.app"]
+		},
+		{
+			description: "OpenDNS client",
+			allAppsIncludes: ["OpenDNS", "opendns"],
+			fileExistsAtPath: [
+				"/Library/Application Support/OpenDNS Roaming Client/dns-updater"
+			]
+		},
+		{
+			description: "osquery",
+			allAppsIncludes: [],
+			fileExistsAtPath: ["/usr/local/bin/osqueryi"]
+		},
+		{
+			description: "OverSight microphone and camera monitoring tool",
+			allAppsIncludes: ["OverSight"],
+			fileExistsAtPath: ["/Applications/OverSight.app"]
+		},
+		{
+			description: "Objective See ProcessMonitor tool",
+			allAppsIncludes: ["processmonitor"],
+			fileExistsAtPath: ["/Applications/ProcessMonitor.app"]
+		},
+		{
+			description: "Pulse VPN client",
+			allAppsIncludes: ["HostChecker", "pulsesecure", "Pulse-Secure"],
+			fileExistsAtPath: ["/Applications/Pulse Secure.app"]
+		},
+		{
+			description: "ReiKey keyboard event taps detection tool",
+			allAppsIncludes: ["reikey"],
+			fileExistsAtPath: ["/Applications/ReiKey.app"]
+		},
+		{
+			description: "Sentinel One agent",
+			allAppsIncludes: ["SentinelOne", "sentinelone"],
+			fileExistsAtPath: []
+		},
+		{
+			description: "Sophos A/V",
+			allAppsIncludes: [],
+			fileExistsAtPath: ["/Library/Sophos Anti-Virus/"]
+		},
+		{
+			description: "Whats Your Sign code signature info tool",
+			allAppsIncludes: ["WhatsYourSign"],
+			fileExistsAtPath: ["/Applications/WhatsYourSign.app"]
+		},
+	]
 
-	if ((allapps.includes("CbDefense")) || (fileMan.fileExistsAtPath("/Applications/Confer.app"))) {
-		toolsInstalled.push("CB Defense A/V")
-	}
+	// For every known AV/security product defined above, check expected app
+	// names and paths against what's on the target
+	knownTools.forEach(function (tool) {
+		appNameFound = tool.allAppsIncludes.some(function (name) {
+			return allapps.includes(name)
+		})
 
-	if ((allapps.includes("ESET")) || (allapps.includes("eset")) || (fileMan.fileExistsAtPath("Library/Application Support/com.eset.remoteadministrator.agent"))) {
-		toolsInstalled.push("ESET A/V")
-	}
+		fileFound = tool.fileExistsAtPath.some(function (path) {
+			return fileMan.fileExistsAtPath(path)
+		})
 
-	if ((allapps.includes("Littlesnitch")) || (allapps.includes("Snitch")) || (fileMan.fileExistsAtPath("/Library/Little Snitch/"))) {
-		toolsInstalled.push("Littlesnitch firewall")
-	}
-
-	if ((allapps.includes("xagt")) || (fileMan.fileExistsAtPath("/Library/FireEye/xagt"))) {
-		toolsInstalled.push("FireEye HX agent")
-	}
-
-	if ((allapps.includes("falconctl")) || (fileMan.fileExistsAtPath("/Library/CS/falcond")) || (fileMan.fileExistsAtPath("/Applications/Falcon.app"))) {
-		toolsInstalled.push("Crowdstrike Falcon agent")
-	}
-
-	if ((allapps.includes("OpenDNS")) || (allapps.includes("opendns")) || (fileMan.fileExistsAtPath("/Library/Application Support/OpenDNS Roaming Client/dns-updater"))) {
-		toolsInstalled.push("OpenDNS client")
-	}
-
-	if ((allapps.includes("SentinelOne")) || (allapps.includes("sentinelone"))) {
-		toolsInstalled.push("Sentinel One agent")
-	}
-
-	if ((allapps.includes("GlobalProtect")) || (allapps.includes("PanGPS")) || (fileMan.fileExistsAtPath("/Library/Logs/PaloAltoNetworks/GlobalProtect")) || (fileMan.fileExistsAtPath("/Library/PaloAltoNetworks"))) {
-		toolsInstalled.push("Global Protect PAN VPN client")
-	}
-
-	if ((allapps.includes("HostChecker")) || (allapps.includes("pulsesecure")) || (fileMan.fileExistsAtPath("/Applications/Pulse Secure.app")) || (allapps.includes("Pulse-Secure"))) {
-		toolsInstalled.push("Pulse VPN client")
-	}
-
-	if ((allapps.includes("AMP-for-Endpoints")) || (fileMan.fileExistsAtPath("/opt/cisco/amp"))) {
-		toolsInstalled.push("Cisco AMP for endpoints")
-	}
-
-	if ((fileMan.fileExistsAtPath("/usr/local/bin/jamf")) || (fileMan.fileExistsAtPath("/usr/local/jamf"))) {
-		toolsInstalled.push("JAMF")
-	}
-
-	if (fileMan.fileExistsAtPath("/Library/Application Support/Malwarebytes")) {
-		toolsInstalled.push("Malwarebytes A/V")
-	}
-
-	if (fileMan.fileExistsAtPath("/usr/local/bin/osqueryi")) {
-		toolsInstalled.push("osquery")
-	}
-
-	if (fileMan.fileExistsAtPath("/Library/Sophos Anti-Virus/")) {
-		toolsInstalled.push("Sophos A/V")
-	}
-
-	if ((allapps.includes("lulu")) || (fileMan.fileExistsAtPath("/Library/Objective-See/Lulu")) || (fileMan.fileExistsAtPath("/Applications/LuLu.app"))) {
-		toolsInstalled.push("LuLu firewall")
-	}
-
-	if ((allapps.includes("dnd")) || (fileMan.fileExistsAtPath("/Library/Objective-See/DND")) || (fileMan.fileExistsAtPath("/Applications/Do Not Disturb.app/"))) {
-		toolsInstalled.push("Do Not Disturb 'lid open' event monitor")
-	}
-
-	if ((allapps.includes("WhatsYourSign")) || (fileMan.fileExistsAtPath("/Applications/WhatsYourSign.app"))) {
-		toolsInstalled.push("Whats Your Sign code signature info tool")
-	}
-
-	if ((allapps.includes("KnockKnock")) || (fileMan.fileExistsAtPath("/Applications/KnockKnock.app"))) {
-		toolsInstalled.push("Knock Knock persistence detection tool")
-	}
-
-	if ((allapps.includes("reikey")) || (fileMan.fileExistsAtPath("/Applications/ReiKey.app"))) {
-		toolsInstalled.push("ReiKey keyboard event taps detection tool")
-	}
-
-	if ((allapps.includes("OverSight")) || (fileMan.fileExistsAtPath("/Applications/OverSight.app"))) {
-		toolsInstalled.push("OverSight microphone and camera monitoring tool")
-	}
-
-	if ((allapps.includes("KextViewr")) || (fileMan.fileExistsAtPath("/Applications/KextViewr.app"))) {
-		toolsInstalled.push("KextViewr kernel module detection tool")
-	}
-
-	if ((allapps.includes("blockblock")) || (fileMan.fileExistsAtPath("/Applications/BlockBlock Helper.app"))) {
-		toolsInstalled.push("Block Block persistence location monitoring tool")
-	}
-
-	if ((allapps.includes("Netiquette")) || (fileMan.fileExistsAtPath("/Applications/Netiquette.app"))) {
-		toolsInstalled.push("Netiquette network monitoring tool")
-	}
-
-	if ((allapps.includes("processmonitor")) || (fileMan.fileExistsAtPath("/Applications/ProcessMonitor.app"))) {
-		toolsInstalled.push("Objective See ProcessMonitor tool")
-	}
-
-	if ((allapps.includes("filemonitor")) || (fileMan.fileExistsAtPath("/Applications/FileMonitor.app"))) {
-		toolsInstalled.push("Objective See FileMonitor tool")
-	}
+		if (appNameFound || fileFound) {
+			toolsInstalled.push(tool.description)
+		}
+	});
 
 	if (json == false) {
 		if (toolsInstalled.length == 0) {
