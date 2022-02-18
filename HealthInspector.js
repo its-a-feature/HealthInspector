@@ -995,7 +995,6 @@ function Krb5_AD_Logging({help=false, json=false, user=""} = {}){
 	}
 	
 	return output;}
-
 function PaloaltoGlobalProtect({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
@@ -1022,7 +1021,6 @@ function PaloaltoGlobalProtect({help=false, json=false, user=""} = {}){
 	}
 
 	return output;}
-
 function Forcepoint_DLP_Information({help=false, json=false, user=""} = {}){
 	if(help){
 		let output = "";
@@ -1058,164 +1056,166 @@ function Forcepoint_DLP_Information({help=false, json=false, user=""} = {}){
 	}
 
 	return output;}
-
-function AVEnum() {
+function AVEnum({help=false, json=false, user=""} = {}) {
 	ObjC.import("AppKit");
-	var fileMan = $.NSFileManager.defaultManager;
-	var runapps = $.NSWorkspace.sharedWorkspace.runningApplications.js;
-	var applist = [];
+	let fileMan = $.NSFileManager.defaultManager;
+	let runapps = $.NSWorkspace.sharedWorkspace.runningApplications.js;
+	let applist = [];
 	for(let i = 0; i < runapps.length; i++){
 	        let info = {};
 	        info['name'] = runapps[i].localizedName.js;
 	        applist.push(info['name']);
-
 	}
-
-	var output = "";
-
-	var allapps = applist.toString();
-	var b = 0;
-	output += "**************************************\n";
-	output += "*********Security Tools Check*********\n";
-	output += "**************************************\n";
+	let output = {};
+	let allapps = applist.toString();
+	let b = 0;
+	
 	if ((allapps.includes("CbOsxSensorService")) || (fileMan.fileExistsAtPath("/Applications/CarbonBlack/CbOsxSensorService"))){
-	        output += "[+] Carbon Black Sensor installed.\n";
+	        output["CarbonBlack"] = "Carbon Black Sensor installed";
 	        b = 1;
 	}
 
 	if ((allapps.includes("CbDefense")) || (fileMan.fileExistsAtPath("/Applications/Confer.app"))){
-	        output += "[+] CB Defense A/V installed.\n";
+	        output["CBDefense AV"] = "CB Defense A/V installed";
 	        b = 1;
 	}
 
 	if ((allapps.includes("ESET")) || (allapps.includes("eset")) || (fileMan.fileExistsAtPath("Library/Application Support/com.eset.remoteadministrator.agent"))){
-	        output += "[+] ESET A/V installed.\n";
+	        output["ESET"] = "ESET A/V installed";
 	        b = 1;
 	}
 
 	if ((allapps.includes("Littlesnitch")) || (allapps.includes("Snitch")) || (fileMan.fileExistsAtPath("/Library/Little Snitch/"))){
-	        output += "[+] Littlesnitch firewall found.\n";
+	        output["LittleSnitch"] = "Littlesnitch firewall found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("xagt")) || (fileMan.fileExistsAtPath("/Library/FireEye/xagt"))){
-	        output += "[+] FireEye HX agent found.\n";
+	        output["FireEye HX"] = "FireEye HX agent found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("falconctl")) || (fileMan.fileExistsAtPath("/Library/CS/falcond")) || (fileMan.fileExistsAtPath("/Applications/Falcon.app"))){
-	        output += "[+] Crowdstrike Falcon agent found.\n";
+	        output["CrowdStrike Falcon"] = "Crowdstrike Falcon agent found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("OpenDNS")) || (allapps.includes("opendns")) || (fileMan.fileExistsAtPath("/Library/Application Support/OpenDNS Roaming Client/dns-updater"))){
-	        output += "[+] OpenDNS client found.\n";
+	        output["OpenDNS"] = "OpenDNS client found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("SentinelOne")) || (allapps.includes("sentinelone"))){
-	        output += "[+] Sentinel One agent found.\n";
+	        output["SentinelOne"] = "Sentinel One agent found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("GlobalProtect")) || (allapps.includes("PanGPS")) || (fileMan.fileExistsAtPath("/Library/Logs/PaloAltoNetworks/GlobalProtect")) || (fileMan.fileExistsAtPath("/Library/PaloAltoNetworks"))){
-	        output += "[+] Global Protect PAN VPN client found.\n";
+	        output["GlobalProtect PAN VPN"] = "Global Protect PAN VPN client found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("HostChecker")) || (allapps.includes("pulsesecure")) || (fileMan.fileExistsAtPath("/Applications/Pulse Secure.app")) || (allapps.includes("Pulse-Secure"))){
-	        output += "[+] Pulse VPN client found.\n";
+	        output["Pulse VPN"] = "Pulse VPN client found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("AMP-for-Endpoints")) || (fileMan.fileExistsAtPath("/opt/cisco/amp"))){
-	        output += "[+] Cisco AMP for endpoints found.\n";
+	        output["Cisco AMP"] = "Cisco AMP for endpoints found";
 	        b = 1;
 	}
 
 	if ((fileMan.fileExistsAtPath("/usr/local/bin/jamf")) || (fileMan.fileExistsAtPath("/usr/local/jamf"))){
-	        output += "[+] JAMF found on this host.\n";
+	        output["JAMF"] = "JAMF found on this host";
 	        b = 1;
 	}
 
 	if (fileMan.fileExistsAtPath("/Library/Application Support/Malwarebytes")){
-	        output += "[+] Malwarebytes A/V found.\n";
+	        output["Malwarebytes"] = "Malwarebytes A/V found";
 	        b = 1;
 	}
 
 	if (fileMan.fileExistsAtPath("/usr/local/bin/osqueryi")){
-	        output += "[+] osquery found.\n";
+	        output["OSQuery"] = "osquery found";
 	        b = 1;
 	}
 
 	if (fileMan.fileExistsAtPath("/Library/Sophos Anti-Virus/")){
-	        output += "[+] Sophos A/V found.\n";
+	        output["Sophos AV"] = "Sophos A/V found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("lulu")) || (fileMan.fileExistsAtPath("/Library/Objective-See/Lulu")) || (fileMan.fileExistsAtPath("/Applications/LuLu.app"))){
-	        output += "[+] LuLu firewall found.\n";
+	        output["lulu"] = "Objective See LuLu firewall found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("dnd")) || (fileMan.fileExistsAtPath("/Library/Objective-See/DND")) || (fileMan.fileExistsAtPath("/Applications/Do Not Disturb.app/"))){
-	        output += "[+] Do Not Disturb 'lid open' event monitor found.\n";
+	        output["Do Not Disturb"] = "Objective See Do Not Disturb 'lid open' event monitor found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("WhatsYourSign")) || (fileMan.fileExistsAtPath("/Applications/WhatsYourSign.app"))){
-	        output += "[+] Whats Your Sign code signature info tool found.\n";
+	        output["Whats Your Sign"] = "Objective See Whats Your Sign code signature info tool found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("KnockKnock")) || (fileMan.fileExistsAtPath("/Applications/KnockKnock.app"))){
-	        output += "[+] Knock Knock persistence detection tool found.\n";
+	        output["KnockKnock"] = "Objective See Knock Knock persistence detection tool found";
 	        b = 1;
 	}
 
 	if ((allapps.includes("reikey")) || (fileMan.fileExistsAtPath("/Applications/ReiKey.app"))){
-	        output += "[+] ReiKey keyboard event taps detection tool found.\n";
+	        output["ReiKey"] = "Objective See ReiKey keyboard event taps detection tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("OverSight")) || (fileMan.fileExistsAtPath("/Applications/OverSight.app"))){
-	        output += "[+] OverSight microphone and camera monitoring tool found.\n";
+	        output["OverSight"] = "OverSight microphone and camera monitoring tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("KextViewr")) || (fileMan.fileExistsAtPath("/Applications/KextViewr.app"))){
-	        output += "[+] KextViewr kernel module detection tool found.\n";
+	        output["KextViewr"] = "KextViewr kernel module detection tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("blockblock")) || (fileMan.fileExistsAtPath("/Applications/BlockBlock Helper.app"))){
-	        output += "[+] Block Block persistence location monitoring tool found.\n";
+	        output["BlockBlock"] = "Objective See Block Block persistence location monitoring tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("Netiquette")) || (fileMan.fileExistsAtPath("/Applications/Netiquette.app"))){
-	        output += "[+] Netiquette network monitoring tool found.\n";
+	        output["Netiquette"] = "Netiquette network monitoring tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("processmonitor")) || (fileMan.fileExistsAtPath("/Applications/ProcessMonitor.app"))){
-	        output += "[+] Objective See Process Monitor tool found.\n";
+	        output["ProcessMonitor"] = "Objective See Process Monitor tool found.\n";
 	        b = 1;
 	}
 
 	if ((allapps.includes("filemonitor")) || (fileMan.fileExistsAtPath("/Applications/FileMonitor.app"))){
-	        output += "[+] Objective See File Monitor tool found.\n";
+	        output["FileMonitor"] = "Objective See File Monitor tool found.\n";
 	        b = 1;
 	}
 
-	if (b == 0){
-	        output += "[-] No security products found.";
-	}
-
-	output += "**************************************\n";
-	return output;
-}
-
+	
+	if(json){
+		output['HealthInspectorCommand'] = "Forcepoint_DLP_Information";
+		return JSON.stringify(output, null, 1);
+	}else{
+		let final_output = "";
+		final_output += "**************************************\n";
+		final_output += "*********Security Tools Check*********\n";
+		final_output += "**************************************\n";
+		final_output += "**************************************\n";
+		final_output += JSON.stringify(output, null, 1);
+		if (b == 0){
+	        final_output += "[-] No security products found.";
+		}
+		return final_output;
+	}}
 
 //---------------------------------------------------------
 function All_Checks({help=false, json=false, user=""} = {}){
@@ -1252,7 +1252,7 @@ function All_Checks({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameter);
 	output += "\n" + PaloaltoGlobalProtect(input_parameter);
 	output += "\n" + Forcepoint_DLP_Information(input_parameter);
-	output += "\n" + AVEnum();
+	output += "\n" + AVEnum(input_parameter);
 	return output;
 }
 function User_Preferences({help=false, json=false, user=""} = {}){
@@ -1288,6 +1288,6 @@ function Global_Preferences({help=false, json=false, user=""} = {}){
 	output += "\n" + Krb5_AD_Logging(input_parameters);
 	output += "\n" + PaloaltoGlobalProtect(input_parameters);
 	output += "\n" + Forcepoint_DLP_Information(input_parameters);
+	output += "\n" + AVEnum(input_parameter);
 	return output;
 }
-All_Checks();
